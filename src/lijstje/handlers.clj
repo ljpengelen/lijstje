@@ -84,10 +84,13 @@
         {:keys [name gifts]} (domain/get-list-by-public-id external-list-id)]
     (page
      [:h1 "Verlanglijstje " (h name)]
-     (for [{:keys [name description price external-id]} gifts]
+     (for [{:keys [name description price external-id reserved-by]} gifts]
        (list
-        [:p (h name) " " (escape-html-and-autolink description) " " (h price)]
-        [:a {:href (str "/gift/" external-id "/reserve")} "Reserveer cadeau"])))))
+        [:p
+         {:class (when reserved-by "reserved")}
+         (h name) " " (escape-html-and-autolink description) " " (h price)]
+        (when-not reserved-by
+          [:a {:href (str "/list/" external-list-id "/view/gift/" external-id "/reserve")} "Reserveer cadeau"]))))))
 
 (defn render-create-gift-page [request]
   (let [{:keys [external-list-id]} (:path-params request)]
