@@ -117,7 +117,7 @@
     (page
      [:h1 "Reserveer " (h name)]
      (form/form-to
-      [:post (str "/list/" external-list-id "/view/gift/" external-gift-id)]
+      [:post (str "/list/" external-list-id "/view/gift/" external-gift-id "/reserve")]
       (anti-forgery-field)
       [:label "Naam"
        (form/text-field :reserved-by)]
