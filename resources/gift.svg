@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100mm" height="100mm" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(-39.71 -33.679)" stroke="#000">
+  <g stroke-linecap="round">
+   <rect x="58.519" y="78.667" width="62.383" height="43.425" ry="3.1858" fill="#fff" stroke-width="2.9699"/>
+   <rect x="52.616" y="66.753" width="74.189" height="18.805" ry="3.6789" fill="#fff" stroke-width="3.5278"/>
+   <rect x="85.223" y="67.59" width="8.974" height="54.695" ry="0" stroke-width="3.1405"/>
+  </g>
+  <g transform="translate(10.899 9.8229)" fill="#fbfbfb" stroke-width="3.5278">
+   <path d="m79.809 53.867s15.58-21.545 25.331-18.032c4.1804 1.506 5.8193 9.1308 3.4347 12.88-5.2278 8.2195-28.766 5.1521-28.766 5.1521z"/>
+   <path d="m77.814 53.867s-15.58-21.545-25.331-18.032c-4.1804 1.506-5.8193 9.1308-3.4347 12.88 5.2278 8.2195 28.766 5.1521 28.766 5.1521z"/>
+  </g>
+ </g>
+</svg>

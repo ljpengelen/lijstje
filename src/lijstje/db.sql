@@ -54,6 +54,18 @@ select gift_id "gift-id",
     reserved_at "reserved-at"
 from gift where list_id = :id
 
+-- :name get-gift-by-external-id :? :1
+-- :doc Get a gift by its external ID
+select gift_id "gift-id",
+    external_id "external-id",
+    list_id "list-id",
+    name,
+    price,
+    description,
+    reserved_by "reserved-by",
+    reserved_at "reserved-at"
+from gift where external_id = :id
+
 -- :name reserve-gift! :! :n
 -- :doc Reserve the gift with the given external ID
 update gift

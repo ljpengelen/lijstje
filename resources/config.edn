@@ -1,2 +1,4 @@
-{:jdbc-url "jdbc:sqlite:lijstje.db"
+{:cookie-key "3d3d93b4c9bc8aa07d2d0c2acd87e7c3"
+ :host "http://localhost:3000"
+ :jdbc-url "jdbc:sqlite:lijstje.db"
  :port 3000}

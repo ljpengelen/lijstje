@@ -1,15 +1,20 @@
 (ns lijstje.domain 
   (:require [lijstje.db :as db]))
 
+(def secure-random (java.security.SecureRandom.))
+
 (defn random-bytes [number-of-bytes]
-  (let [secure-random (java.security.SecureRandom.)
-        bytes (byte-array number-of-bytes)]
+  (let [bytes (byte-array number-of-bytes)]
     (.nextBytes secure-random bytes)
     bytes))
 
+(def hex-format (java.util.HexFormat/of))
+
 (defn bytes->hex-string [bytes]
-  (let [hex-format (java.util.HexFormat/of)]
-    (.formatHex hex-format bytes)))
+  (.formatHex hex-format bytes))
+
+(defn hex-string->bytes [hex-string]
+  (.parseHex hex-format hex-string))
 
 (defn random-hex-string [number-of-bytes]
   (-> number-of-bytes
@@ -19,7 +24,8 @@
 (comment
   (random-bytes 100)
   (bytes->hex-string (random-bytes 8))
-  (random-hex-string 16))
+  (random-hex-string 16)
+  (hex-string->bytes "3d3d93b4c9bc8aa07d2d0c2acd87e7c3"))
 
 (defn new-list [name]
   {:name name
@@ -64,7 +70,7 @@
 
 (comment
   (get-list-by-public-id "812b098ce4bd6725")
-  (get-list-by-private-id "28d9bad1e3099bf9"))
+  (get-list-by-private-id "38719a1be66a15e6"))
 
 (defn get-all-lists []
   (for [list (db/get-all-lists db/ds)]
@@ -72,6 +78,9 @@
 
 (comment
   (get-all-lists))
+
+(defn get-gift [external-id]
+  (db/get-gift-by-external-id db/ds {:id external-id}))
 
 (defn reserve-gift! [external-id reserved-by]
   (db/reserve-gift! db/ds {:external-id external-id
