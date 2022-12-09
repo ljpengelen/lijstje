@@ -10,6 +10,7 @@ RUN $JAVA_HOME/bin/jlink \
 
 COPY deps.edn .
 RUN clojure -M -e "(prn \"Downloading deps\")"
+RUN clojure -M:build -e "(prn \"Downloading deps\")"
 
 COPY . .
 RUN clojure -T:build clean
