@@ -69,6 +69,11 @@ a:hover {
     opacity: 0.5;
 }
 
+.gift-description {
+    margin-bottom: 1rem;
+    white-space: break-spaces;
+}
+
 .button,
 .secondary-button {
     align-self: flex-start;
