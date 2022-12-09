@@ -50,23 +50,28 @@
 (comment
   (create-list! "Kerst Luc"))
 
-(defn create-gift! [list-id name price description]
-  (let [gift (new-gift list-id name price description)]
-    (db/create-gift! db/ds gift)))
+(defn create-gift! [private-list-id name price description]
+  (if-let [{:keys [list-id]} (db/get-list-by-private-id db/ds {:id private-list-id})]
+    (let [gift (new-gift list-id name price description)]
+      (db/create-gift! db/ds gift))
+    (throw (ex-info "List not found" {:ui-message "Deze lijst bestaat niet."}))))
 
 (comment
   (create-gift! 1 "Koffiebonen" "10,-" "Bruin"))
 
 (defn extend-list-with-gifts [{:keys [list-id] :as list}]
-  (when list
-    (let [gifts (db/get-gifts-by-list-id db/ds {:id list-id})]
-      (assoc list :gifts gifts))))
+  (let [gifts (db/get-gifts-by-list-id db/ds {:id list-id})]
+    (assoc list :gifts gifts)))
 
 (defn get-list-by-public-id [id]
-  (extend-list-with-gifts (db/get-list-by-public-id db/ds {:id id})))
+  (if-let [list (db/get-list-by-public-id db/ds {:id id})]
+    (extend-list-with-gifts list)
+    (throw (ex-info "List not found" {:ui-message "Deze lijst bestaat niet."}))))
 
 (defn get-list-by-private-id [id]
-  (extend-list-with-gifts (db/get-list-by-private-id db/ds {:id id})))
+  (if-let [list (db/get-list-by-private-id db/ds {:id id})]
+    (extend-list-with-gifts list)
+    (throw (ex-info "List not found" {:ui-message "Deze lijst bestaat niet."}))))
 
 (comment
   (get-list-by-public-id "812b098ce4bd6725")
@@ -80,7 +85,9 @@
   (get-all-lists))
 
 (defn get-gift [external-id]
-  (db/get-gift-by-external-id db/ds {:id external-id}))
+  (if-let [gift (db/get-gift-by-external-id db/ds {:id external-id})]
+    gift
+    (throw (ex-info "Gift not found" {:ui-message "Dit cadeau bestaat niet."}))))
 
 (defn reserve-gift! [external-id reserved-by]
   (db/reserve-gift! db/ds {:external-id external-id
@@ -89,3 +96,19 @@
 
 (comment
   (reserve-gift! "c544781ff5411936" "Kerstman"))
+
+(defn cancel-gift-reservation! [external-id]
+  (db/cancel-gift-reservation! db/ds {:external-id external-id}))
+
+(defn delete-list! [private-list-id]
+  (db/delete-gifts-by-private-list-id! db/ds {:id private-list-id})
+  (db/delete-list-by-private-id! db/ds {:id private-list-id}))
+
+(defn update-gift! [external-id name price description]
+  (db/update-gift! db/ds {:id external-id
+                          :name name
+                          :price price
+                          :description description}))
+
+(defn delete-gift! [external-id]
+  (db/delete-gift! db/ds {:id external-id}))

@@ -14,8 +14,11 @@
     (try
       (handler request)
       (catch Exception e
-        (println e)
-        h/internal-server-error-page))))
+        (if (and (instance? clojure.lang.ExceptionInfo e) (:ui-message (ex-data e)))
+          (h/render-domain-exception-page e)
+          (do
+            (println e)
+            h/internal-server-error-page))))))
 
 (defn no-caching-response [response]
   (assoc-in response [:headers "Cache-Control"] "no-cache, no-store"))
@@ -32,14 +35,25 @@
     [["/" {:get h/render-create-list-page
            :post h/create-list}]
      ["/list/:external-list-id"
+      ["/delete" {:get h/render-delete-list-page
+                  :post h/delete-list}]
       ["/view"
        ["" h/render-view-list-page]
-       ["/gift/:external-gift-id/reserve" {:get h/render-reserve-gift-page
-                                           :post h/reserve-gift}]]
+       ["/gift/:external-gift-id"
+        ["/reserve" {:get h/render-reserve-gift-page
+                     :post h/reserve-gift}]
+        ["/cancel-reservation" {:get h/render-cancel-gift-reservation-page
+                                :post h/cancel-gift-reservation}]]]
       ["/edit" 
        ["" h/render-edit-list-page]
-       ["/gift" {:get h/render-create-gift-page
-                 :post h/create-gift}]]]]
+       ["/gift"
+        ["" {:get h/render-create-gift-page
+             :post h/create-gift}]
+        ["/:external-gift-id"
+         ["/edit" {:get h/render-edit-gift-page
+                   :post h/update-gift}]
+         ["/delete" {:get h/render-delete-gift-page
+                     :post h/delete-gift}]]]]]]
     {:data {:middleware [wrap-pretty-exceptions
                          wrap-params
                          wrap-keyword-params

@@ -8,6 +8,8 @@
 (hugsql/def-db-fns "lijstje/db.sql")
 (declare create-list! get-list-by-public-id get-list-by-private-id
          get-all-lists create-gift! get-gifts-by-list-id
-         get-gift-by-external-id reserve-gift!)
+         get-gift-by-external-id reserve-gift! cancel-gift-reservation!
+         delete-list-by-private-id! delete-gifts-by-private-list-id!
+         update-gift! delete-gift!)
 
 (def ds (:jdbc-url env))

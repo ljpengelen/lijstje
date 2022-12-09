@@ -74,3 +74,35 @@ set reserved_by = :reserved-by,
 where external_id = :external-id and
     reserved_by is null and
     reserved_at is null
+
+-- :name cancel-gift-reservation! :! :n
+-- :doc Cancel the reservation of the gift with the given external ID
+update gift
+set reserved_by = null,
+    reserved_at = null
+where external_id = :external-id
+
+-- :name delete-list-by-private-id! :! :n
+-- :doc Delete the list with the given private external ID
+delete from list
+where private_external_id = :id
+
+-- :name delete-gifts-by-private-list-id! :! :n
+-- :doc Delete the gifts belonging to the list with the given private external ID
+delete from gift
+where list_id = (
+    select list_id from list
+    where private_external_id = :id)
+
+-- :name update-gift! :! :n
+-- :doc Update the gift with the given external ID
+update gift
+set name = :name,
+    price = :price,
+    description = :description
+where external_id = :id
+
+-- :name delete-gift! :! :n
+-- :doc Delete the gift with the given external ID
+delete from gift
+where external_id = :id
