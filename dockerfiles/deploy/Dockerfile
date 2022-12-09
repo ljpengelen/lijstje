@@ -8,6 +8,9 @@ RUN $JAVA_HOME/bin/jlink \
          --compress=2 \
          --output /javaruntime
 
+COPY deps.edn .
+RUN clojure -M -e "(prn \"Downloading deps\")"
+
 COPY . .
 RUN clojure -T:build clean
 RUN clojure -T:build uber
