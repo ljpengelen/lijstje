@@ -2,10 +2,12 @@
 .clj-kondo
 .cpcache
 .git
-.gitignore
 .lsp
 dev
 dockerfiles
+target
+.dockerignore
+.gitignore
 .nrepl-port
 *.db
 *.md
