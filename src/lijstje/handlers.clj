@@ -125,8 +125,8 @@
           [:div {:class "gift-price"} (h price)]]
          [:div {:class "gift-description"} (escape-html-and-autolink description)]
          (if reserved-by
-           [:a {:href (str "/list/" external-list-id "/view/gift/" external-id "/cancel-reservation")} "Maak reservering ongedaan"]
-           [:a {:href (str "/list/" external-list-id "/view/gift/" external-id "/reserve")} "Reserveer cadeau"])])))))
+           [:a {:class "button" :href (str "/list/" external-list-id "/view/gift/" external-id "/cancel-reservation")} "Maak reservering ongedaan"]
+           [:a {:class "button" :href (str "/list/" external-list-id "/view/gift/" external-id "/reserve")} "Reserveer cadeau"])])))))
 
 (defn render-create-gift-page [request]
   (let [{:keys [external-list-id]} (:path-params request)]
@@ -218,9 +218,9 @@
       [:label "Jouw naam"
        (form/text-field {:required true} :reserved-by)]
       [:div {:class "horizontal-buttons"}
-       [:a {:href (str "/list/" external-list-id "/view")} "Ga terug"]
+       [:a {:class "secondary-button" :href (str "/list/" external-list-id "/view")} "Ga terug"]
        #_ {:clj-kondo/ignore [:invalid-arity]}
-       (form/submit-button {:name :ok} "Reserveer cadeau")]))))
+       (form/submit-button {:class "button" :name :ok} "Reserveer cadeau")]))))
 
 (defn reserve-gift [request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
@@ -241,9 +241,9 @@
       [:post (str "/list/" external-list-id "/view/gift/" external-gift-id "/cancel-reservation")]
       (anti-forgery-field)
       [:div {:class "horizontal-buttons"}
-       [:a {:href (str "/list/" external-list-id "/view")} "Nee, ga terug"]
+       [:a {:class "secondary-button" :href (str "/list/" external-list-id "/view")} "Nee, ga terug"]
        #_ {:clj-kondo/ignore [:invalid-arity]}
-       (form/submit-button {:name :ok} "Ja, maak reservering ongedaan")]))))
+       (form/submit-button {:class "button" :name :ok} "Ja, maak reservering ongedaan")]))))
 
 (defn cancel-gift-reservation [request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
