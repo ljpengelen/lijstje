@@ -1,0 +1,9 @@
+.calva
+.clj-kondo
+.cpcache
+.lsp
+dev
+dockerfiles
+.nrepl-port
+*.db
+*.md
