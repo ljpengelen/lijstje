@@ -116,8 +116,8 @@
         {:keys [name gifts]} (domain/get-list-by-public-id external-list-id)]
     (page
      [:h1 "Verlanglijstje " (h name)]
-     (for [{:keys [name description price external-id reserved-by]} (sort-by :reserved-at gifts)]
-       (list
+     [:div {:class "gifts"}
+      (for [{:keys [name description price external-id reserved-by]} (sort-by :reserved-at gifts)]
         [:div
          {:class (str "gift " (when reserved-by "reserved"))}
          [:div {:class "gift-name-and-price"}
@@ -126,7 +126,7 @@
          [:div {:class "gift-description"} (escape-html-and-autolink description)]
          (if reserved-by
            [:a {:class "button" :href (str "/list/" external-list-id "/view/gift/" external-id "/cancel-reservation")} "Maak reservering ongedaan"]
-           [:a {:class "button" :href (str "/list/" external-list-id "/view/gift/" external-id "/reserve")} "Reserveer cadeau"])])))))
+           [:a {:class "button" :href (str "/list/" external-list-id "/view/gift/" external-id "/reserve")} "Reserveer cadeau"])])])))
 
 (defn render-create-gift-page [request]
   (let [{:keys [external-list-id]} (:path-params request)]
