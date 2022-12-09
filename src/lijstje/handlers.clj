@@ -29,6 +29,8 @@
         (str "<a target=\"_blank\" href=\"" (with-protocol text) "\">" text "</a>")
         (h text)))))
 
+(defonce compiled-at (System/currentTimeMillis))
+
 (defn page [& content]
   {:status 200
    :headers {"Content-type" "text/html"}
@@ -52,7 +54,7 @@
              :href "/favicon-16x16.png"}]
      [:title "Verlanglijstje"]
      (hp/include-css "/css/reset.css")
-     (hp/include-css "/css/screen.css")]
+     (hp/include-css (str "/css/screen.css?version=" compiled-at))]
     [:body content])})
 
 (defn render-create-list-page [_]
