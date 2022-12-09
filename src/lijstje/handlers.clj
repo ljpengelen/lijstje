@@ -26,7 +26,7 @@
                 end (.getEndIndex span)
                 text (subs input begin end)]]
       (if (instance? LinkSpan span)
-        (str "<a target=\"_blank\" href=\"" (with-protocol text) "\">" text "</a>")
+        (str "<a target=\"_blank\" rel=\"noreferrer\" href=\"" (with-protocol text) "\">" text "</a>")
         (h text)))))
 
 (defonce compiled-at (System/currentTimeMillis))
