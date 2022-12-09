@@ -1,3 +1,70 @@
 * {
     box-sizing: border-box;
 }
+
+html {
+    color: black;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    line-height: 1.5;
+    margin: 0 auto;
+    max-width: 40rem;
+    padding: 2rem;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+p, form {
+    margin: 2rem 0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+a {
+    color: black;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+.horizontal-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.gift {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 2rem 0;
+}
+
+.gift-name {
+    text-transform: capitalize;
+}
+
+.gift-name-and-price {
+    display:flex;
+    gap: 2rem;
+}
+
+.gift.reserved {
+    opacity: 0.5;
+}

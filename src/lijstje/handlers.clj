@@ -96,10 +96,11 @@
      (form/form-to
       [:post (str "/list/" external-list-id "/delete")]
       (anti-forgery-field)
-      #_{:clj-kondo/ignore [:invalid-arity]}
-      (form/submit-button {:name :cancel :formnovalidate true} "Nee, ga terug")
-      #_{:clj-kondo/ignore [:invalid-arity]}
-      (form/submit-button {:name :ok} "Ja, verwijder lijst")))))
+      [:div {:class "horizontal-buttons"}
+       #_ {:clj-kondo/ignore [:invalid-arity]}
+       (form/submit-button {:name :cancel :formnovalidate true} "Nee, ga terug")
+       #_ {:clj-kondo/ignore [:invalid-arity]}
+       (form/submit-button {:name :ok} "Ja, verwijder lijst")]))))
 
 (defn delete-list [request]
   (let [{:keys [external-list-id]} (:path-params request)
@@ -115,14 +116,17 @@
         {:keys [name gifts]} (domain/get-list-by-public-id external-list-id)]
     (page
      [:h1 "Verlanglijstje " (h name)]
-     (for [{:keys [name description price external-id reserved-by]} gifts]
+     (for [{:keys [name description price external-id reserved-by]} (sort-by :reserved-at gifts)]
        (list
-        [:p
-         {:class (when reserved-by "reserved")}
-         (h name) " " (escape-html-and-autolink description) " " (h price)]
-        (if reserved-by
-          [:a {:href (str "/list/" external-list-id "/view/gift/" external-id "/cancel-reservation")} "Maak reservering ongedaan"]
-          [:a {:href (str "/list/" external-list-id "/view/gift/" external-id "/reserve")} "Reserveer cadeau"]))))))
+        [:div
+         {:class (str "gift " (when reserved-by "reserved"))}
+         [:div {:class "gift-name-and-price"}
+          [:div {:class "gift-name"} (h name)]
+          [:div {:class "gift-price"} (h price)]]
+         [:div {:class "gift-description"} (escape-html-and-autolink description)]
+         (if reserved-by
+           [:a {:href (str "/list/" external-list-id "/view/gift/" external-id "/cancel-reservation")} "Maak reservering ongedaan"]
+           [:a {:href (str "/list/" external-list-id "/view/gift/" external-id "/reserve")} "Reserveer cadeau"])])))))
 
 (defn render-create-gift-page [request]
   (let [{:keys [external-list-id]} (:path-params request)]
@@ -137,9 +141,10 @@
        (form/text-field {:required true} :price)]
       [:label "Omschrijving"
        (form/text-area {:required true} :description)]
-      [:a {:href (str "/list/" external-list-id "/edit")} "Ga terug"]
-      #_{:clj-kondo/ignore [:invalid-arity]}
-      (form/submit-button {:name :ok} "Voeg cadeau toe")))))
+      [:div {:class "horizontal-buttons"}
+       [:a {:href (str "/list/" external-list-id "/edit")} "Ga terug"]
+       #_ {:clj-kondo/ignore [:invalid-arity]}
+       (form/submit-button {:name :ok} "Voeg cadeau toe")]))))
 
 (defn create-gift [request]
   (let [{:keys [external-list-id]} (:path-params request)
@@ -163,9 +168,10 @@
       [:label "Omschrijving"
        #_{:clj-kondo/ignore [:invalid-arity]}
        (form/text-area {:required true} :description description)]
-      [:a {:href (str "/list/" external-list-id "/edit")} "Ga terug"]
-      #_{:clj-kondo/ignore [:invalid-arity]}
-      (form/submit-button {:name :ok} "Sla wijzigingen op")))))
+      [:div {:class "horizontal-buttons"}
+       [:a {:href (str "/list/" external-list-id "/edit")} "Ga terug"]
+       #_ {:clj-kondo/ignore [:invalid-arity]}
+       (form/submit-button {:name :ok} "Sla wijzigingen op")]))))
 
 (defn update-gift [request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
@@ -183,9 +189,10 @@
      (form/form-to
       [:post (str "/list/" external-list-id "/edit/gift/" external-gift-id "/delete")]
       (anti-forgery-field)
-      [:a {:href (str "/list/" external-list-id "/edit")} "Nee, ga terug"]
-      #_{:clj-kondo/ignore [:invalid-arity]}
-      (form/submit-button {:name :ok} "Ja, verwijder cadeau")))))
+      [:div {:class "horizontal-buttons"}
+       [:a {:href (str "/list/" external-list-id "/edit")} "Nee, ga terug"]
+       #_ {:clj-kondo/ignore [:invalid-arity]}
+       (form/submit-button {:name :ok} "Ja, verwijder cadeau")]))))
 
 (defn delete-gift [request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
@@ -199,14 +206,21 @@
         {:keys [name]} (domain/get-gift external-gift-id)]
     (page
      [:h1 "Reserveer " (h name)]
+     [:p
+      "Je kunt cadeau's reserveren als je van plan bent om ze te kopen. "
+      "Als dat uiteindelijk niet lukt, dan kun je de reservering weer ongedaan maken. "]
+     [:p
+      "Geef een naam op bij het reserveren, dan weet je later zeker dat jij degene bent "
+      "die een cadeau gereserveerd had."]
      (form/form-to
       [:post (str "/list/" external-list-id "/view/gift/" external-gift-id "/reserve")]
       (anti-forgery-field)
       [:label "Jouw naam"
        (form/text-field {:required true} :reserved-by)]
-      [:a {:href (str "/list/" external-list-id "/view")} "Ga terug"]
-      #_{:clj-kondo/ignore [:invalid-arity]}
-      (form/submit-button {:name :ok} "Reserveer cadeau")))))
+      [:div {:class "horizontal-buttons"}
+       [:a {:href (str "/list/" external-list-id "/view")} "Ga terug"]
+       #_ {:clj-kondo/ignore [:invalid-arity]}
+       (form/submit-button {:name :ok} "Reserveer cadeau")]))))
 
 (defn reserve-gift [request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
@@ -221,14 +235,15 @@
     (page
      [:h1 "Annuleer reservering van " (h name)]
      [:p
-      "Dit cadeau is gereserveerd door " (h reserved-by) "."
+      "Dit cadeau is gereserveerd door " (h reserved-by) ". "
       "Weet je zeker dat je deze reservering ongedaan wilt maken?"]
      (form/form-to
       [:post (str "/list/" external-list-id "/view/gift/" external-gift-id "/cancel-reservation")]
       (anti-forgery-field)
-      [:a {:href (str "/list/" external-list-id "/view")} "Nee, ga terug"]
-      #_{:clj-kondo/ignore [:invalid-arity]}
-      (form/submit-button {:name :ok} "Ja, maak reservering ongedaan")))))
+      [:div {:class "horizontal-buttons"}
+       [:a {:href (str "/list/" external-list-id "/view")} "Nee, ga terug"]
+       #_ {:clj-kondo/ignore [:invalid-arity]}
+       (form/submit-button {:name :ok} "Ja, maak reservering ongedaan")]))))
 
 (defn cancel-gift-reservation [request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
