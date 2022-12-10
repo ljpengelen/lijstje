@@ -130,6 +130,17 @@ a:hover {
     gap: 2rem;
 }
 
+.edit-list-gifts {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.edit-list-gifts .gift-description {
+    max-height: 6rem;
+    overflow: auto;
+}
+
 code {
     font-family: 'Courier New', Courier, monospace;
 }

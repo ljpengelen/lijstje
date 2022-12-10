@@ -98,11 +98,14 @@
       [:div {:class "edit-list-gifts"}
        (when (empty? gifts) [:p "Dit verlanglijstje bevat nog geen cadeau's."])
        (for [{:keys [external-id name description price]} gifts]
-         (list
-          [:div {:class "gift"}
-           (h name) " " (escape-html-and-autolink description) " " (h price)
-           [:a {:href (str "/list/" external-list-id "/edit/gift/" external-id "/edit")} "Bewerk cadeau"]
-           [:a {:href (str "/list/" external-list-id "/edit/gift/" external-id "/delete")} "Verwijder cadeau"]]))
+         [:div {:class "gift"}
+          [:div {:class "gift-name-and-price"}
+           [:div {:class "gift-name"} (h name)]
+           [:div {:class "gift-price"} (h price)]]
+          [:div {:class "gift-description"} (escape-html-and-autolink description)]
+          [:div {:class "horizontal-buttons"}
+           (primary-button-link (str "/list/" external-list-id "/edit/gift/" external-id "/edit") "Bewerk cadeau")
+           (primary-button-link (str "/list/" external-list-id "/edit/gift/" external-id "/delete") "Verwijder cadeau")]])
        (primary-button-link (str "/list/" external-list-id "/edit/gift") "Voeg cadeau toe")]])))
 
 (defn cancellation-button [url text]
