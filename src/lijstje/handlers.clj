@@ -57,59 +57,78 @@
      (hp/include-css (str "/css/screen.css?version=" (compiled-at)))]
     [:body content])})
 
+(defn confirmation-button [text]
+  #_{:clj-kondo/ignore [:invalid-arity]}
+  (form/submit-button {:class "button" :name :ok} text))
+
 (defn render-create-list-page [_]
   (page
    [:h1 "Maak een nieuw verlanglijstje"]
    (form/form-to
     [:post "/"]
     (anti-forgery-field)
-    [:label "Naam"
-     (form/text-field {:required true} :name)]
-    (form/submit-button "Maak nieuwe lijst"))))
+    [:label "Naam van je lijstje"
+     (form/text-field {:maxlength 100 :required true} :name)]
+    (confirmation-button "Maak nieuwe lijst"))))
 
 (defn create-list [request]
   (let [name (-> request :params :name)
         {:keys [private-external-id]} (domain/create-list! name)]
     (response/redirect (str "/list/" private-external-id "/edit") :see-other)))
 
+(defn primary-button-link [url text]
+  [:a {:class "button" :href url} text])
+
+(defn secondary-button-link [url text]
+  [:a {:class "secondary-button" :href url} text])
+
 (defn render-edit-list-page [request]
   (let [{:keys [external-list-id]} (:path-params request)
         {:keys [name gifts public-external-id]} (domain/get-list-by-private-id external-list-id)]
     (page
      [:h1 "Bewerk verlanglijstje " (h name)]
-     (for [{:keys [external-id name description price]} gifts]
-       (list
-        [:p
-         (h name) " " (escape-html-and-autolink description) " " (h price)
-         [:a {:href (str "/list/" external-list-id "/edit/gift/" external-id "/edit")} "Bewerk cadeau"]
-         [:a {:href (str "/list/" external-list-id "/edit/gift/" external-id "/delete")} "Verwijder cadeau"]]))
-     [:a {:href (str "/list/" external-list-id "/edit/gift")} "Voeg cadeau toe"]
-     [:p "Deel met anderen: " (str (:host env)"/list/" public-external-id "/view")]
-     [:a {:href (str "/list/" external-list-id "/delete")} "Verwijder lijstje"])))
+     [:div {:class "edit-list"}
+      [:div {:class "edit-list-urls"}
+       [:p
+        "Bewaar deze pagina goed. "
+        "Het is de enige manier om later je lijstje aan te passen of te "
+        [:a {:href (str "/list/" external-list-id "/delete")} "verwijderen"] "."]
+       [:p "Deel de volgende URL met anderen. Zij kunnen dan je lijstje bekijken en cadeau's reserveren."]
+       [:code (str (:host env) "/list/" public-external-id "/view")]]
+      [:div {:class "edit-list-gifts"}
+       (when (empty? gifts) [:p "Dit verlanglijstje bevat nog geen cadeau's."])
+       (for [{:keys [external-id name description price]} gifts]
+         (list
+          [:div {:class "gift"}
+           (h name) " " (escape-html-and-autolink description) " " (h price)
+           [:a {:href (str "/list/" external-list-id "/edit/gift/" external-id "/edit")} "Bewerk cadeau"]
+           [:a {:href (str "/list/" external-list-id "/edit/gift/" external-id "/delete")} "Verwijder cadeau"]]))
+       (primary-button-link (str "/list/" external-list-id "/edit/gift") "Voeg cadeau toe")]])))
+
+(defn cancellation-button [url text]
+  (secondary-button-link url text))
 
 (defn render-delete-list-page [request]
   (let [{:keys [external-list-id]} (:path-params request)
         {:keys [name]} (domain/get-list-by-private-id external-list-id)]
     (page
      [:h1 "Verwijder " (h name)]
-     [:p "Weet je zeker dat je het verlanglijstje \" " (h name) "\" wilt verwijderen?"]
+     [:p
+      "Weet je zeker dat je het verlanglijstje \"" (h name) "\" wilt verwijderen? "
+      "Dit kan later niet ongedaan gemaakt worden."]
      (form/form-to
       [:post (str "/list/" external-list-id "/delete")]
       (anti-forgery-field)
       [:div {:class "horizontal-buttons"}
-       #_ {:clj-kondo/ignore [:invalid-arity]}
-       (form/submit-button {:name :cancel :formnovalidate true} "Nee, ga terug")
-       #_ {:clj-kondo/ignore [:invalid-arity]}
-       (form/submit-button {:name :ok} "Ja, verwijder lijst")]))))
+       (cancellation-button (str "/list/" external-list-id "/edit") "Nee, ga terug")
+       (confirmation-button "Ja, verwijder lijst")]))))
 
 (defn delete-list [request]
   (let [{:keys [external-list-id]} (:path-params request)
         {:keys [ok]} (:params request)]
-    (if ok
-      (do
-        (domain/delete-list! external-list-id)
-        (response/redirect "/" :see-other))
-      (response/redirect (str "/list/" external-list-id "/edit") :see-other))))
+    (when ok
+      (domain/delete-list! external-list-id))
+    (response/redirect "/" :see-other)))
 
 (defn render-view-list-page [request]
   (let [{:keys [external-list-id]} (:path-params request)
@@ -132,19 +151,21 @@
   (let [{:keys [external-list-id]} (:path-params request)]
     (page
      [:h1 "Voeg een cadeau toe"]
+     [:p
+      "In de omschrijving van het cadeau kun je ook URLs gebruiken. "
+      "Degenen met wie je je lijstje deelt, krijgen dan klikbare links te zien."]
      (form/form-to
       [:post (str "/list/" external-list-id "/edit/gift")]
       (anti-forgery-field)
       [:label "Naam"
-       (form/text-field {:required true} :name)]
+       (form/text-field {:maxlength 100 :required true} :name)]
       [:label "Richtprijs"
-       (form/text-field {:required true} :price)]
+       (form/text-field {:maxlength 100 :required true} :price)]
       [:label "Omschrijving"
-       (form/text-area {:required true} :description)]
+       (form/text-area {:maxlength 2000 :required true :rows 10} :description)]
       [:div {:class "horizontal-buttons"}
-       [:a {:href (str "/list/" external-list-id "/edit")} "Ga terug"]
-       #_ {:clj-kondo/ignore [:invalid-arity]}
-       (form/submit-button {:name :ok} "Voeg cadeau toe")]))))
+       (cancellation-button (str "/list/" external-list-id "/edit") "Ga terug")
+       (confirmation-button "Voeg cadeau toe")]))))
 
 (defn create-gift [request]
   (let [{:keys [external-list-id]} (:path-params request)
@@ -158,20 +179,22 @@
         {:keys [name price description]} (domain/get-gift external-gift-id)]
     (page
      [:h1 "Bewerk " (h name)]
+     [:p
+      "In de omschrijving van het cadeau kun je ook URLs gebruiken. "
+      "Degenen met wie je je lijstje deelt, krijgen dan klikbare links te zien."]
      (form/form-to
       [:post (str "/list/" external-list-id "/edit/gift/" external-gift-id "/edit")]
       (anti-forgery-field)
       [:label "Naam"
-       (form/text-field {:required true :value name} :name)]
+       (form/text-field {:maxlength 100 :required true :value name} :name)]
       [:label "Richtprijs"
-       (form/text-field {:required true :value price} :price)]
+       (form/text-field {:maxlength 100 :required true :value price} :price)]
       [:label "Omschrijving"
        #_{:clj-kondo/ignore [:invalid-arity]}
-       (form/text-area {:required true} :description description)]
+       (form/text-area {:maxlength 2000 :required true :rows 10} :description description)]
       [:div {:class "horizontal-buttons"}
-       [:a {:href (str "/list/" external-list-id "/edit")} "Ga terug"]
-       #_ {:clj-kondo/ignore [:invalid-arity]}
-       (form/submit-button {:name :ok} "Sla wijzigingen op")]))))
+       (cancellation-button (str "/list/" external-list-id "/edit") "Ga terug")
+       (confirmation-button "Sla wijzigingen op")]))))
 
 (defn update-gift [request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
@@ -190,9 +213,8 @@
       [:post (str "/list/" external-list-id "/edit/gift/" external-gift-id "/delete")]
       (anti-forgery-field)
       [:div {:class "horizontal-buttons"}
-       [:a {:href (str "/list/" external-list-id "/edit")} "Nee, ga terug"]
-       #_ {:clj-kondo/ignore [:invalid-arity]}
-       (form/submit-button {:name :ok} "Ja, verwijder cadeau")]))))
+       (cancellation-button (str "/list/" external-list-id "/edit") "Nee, ga terug")
+       (confirmation-button "Ja, verwijder cadeau")]))))
 
 (defn delete-gift [request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
@@ -216,7 +238,7 @@
       [:post (str "/list/" external-list-id "/view/gift/" external-gift-id "/reserve")]
       (anti-forgery-field)
       [:label "Jouw naam"
-       (form/text-field {:required true} :reserved-by)]
+       (form/text-field {:maxlength 100 :required true} :reserved-by)]
       [:div {:class "horizontal-buttons"}
        [:a {:class "secondary-button" :href (str "/list/" external-list-id "/view")} "Ga terug"]
        #_ {:clj-kondo/ignore [:invalid-arity]}

@@ -27,6 +27,12 @@ form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    max-width: 20rem;
+}
+
+input {
+    height: 2rem;
+    padding: 0.5rem;
 }
 
 label {
@@ -88,12 +94,14 @@ a:hover {
     border-radius: 0.25rem;
     color: black;
     cursor: pointer;
-    display: flex;
+    display: inline-block;
     font-size: 0.875rem;
     font-weight: normal;
     line-height: 1;
     padding: 0.5rem;
     text-decoration: none;
+    transition-duration: 0.25s;
+    transition-property: background-color, color;
 }
 
 .secondary-button {
@@ -114,4 +122,14 @@ a:hover {
 .secondary-button:hover {
     background-color: black;
     color: white;
+}
+
+.edit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+code {
+    font-family: 'Courier New', Courier, monospace;
 }
