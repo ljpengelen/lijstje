@@ -44,6 +44,7 @@ label {
 a {
     color: black;
     font-weight: bold;
+    overflow-wrap: break-word;
 }
 
 a:hover {
