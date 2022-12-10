@@ -137,7 +137,9 @@
   (let [{:keys [external-list-id]} (:path-params request)
         {:keys [name gifts]} (domain/get-list-by-public-id external-list-id)]
     (page
-     [:h1 "Verlanglijstje " (h name)]
+     [:div {:class "header"}
+      [:h1 "Verlanglijstje " (h name)]
+      [:a {:class "menu-button" :href "/"} "Nieuw lijstje"]]
      [:div {:class "gifts"}
       (for [{:keys [name description price external-id reserved-by]} (sort-by :reserved-at gifts)]
         [:div

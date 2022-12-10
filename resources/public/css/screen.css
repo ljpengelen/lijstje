@@ -87,6 +87,7 @@ a:hover {
 }
 
 .button,
+.menu-button,
 .secondary-button {
     align-self: flex-start;
     background-color: white;
@@ -104,6 +105,7 @@ a:hover {
     transition-property: background-color, color;
 }
 
+.menu-button,
 .secondary-button {
     background-color: white;
     color: black;
@@ -119,6 +121,7 @@ a:hover {
     color: black;
 }
 
+.menu-button:hover,
 .secondary-button:hover {
     background-color: black;
     color: white;
@@ -143,4 +146,14 @@ a:hover {
 
 code {
     font-family: 'Courier New', Courier, monospace;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.menu-button {
+    flex: none;
+    margin-top: 0.5rem;
 }
