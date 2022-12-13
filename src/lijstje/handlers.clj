@@ -138,8 +138,8 @@
         {:keys [name gifts]} (domain/get-list-by-public-id external-list-id)]
     (page
      [:div {:class "header"}
-      [:h1 "Verlanglijstje " (h name)]
-      [:a {:class "menu-button" :href "/"} "Nieuw lijstje"]]
+      [:h1 "Ver&shy;lang&shy;lijst&shy;je " (h name)]
+      [:a {:class "menu-button" :href "/"} "Maak nieuw lijstje"]]
      [:div {:class "gifts"}
       (for [{:keys [name description price external-id reserved-by]} (sort-by :reserved-at gifts)]
         [:div

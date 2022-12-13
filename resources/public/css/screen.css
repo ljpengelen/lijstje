@@ -17,6 +17,8 @@ body {
 h1 {
     font-size: 2rem;
     font-weight: bold;
+    line-height: 1.25;
+    margin-bottom: 1.5rem;
 }
 
 p, form {
@@ -53,6 +55,7 @@ a:hover {
 
 .horizontal-buttons {
     display: flex;
+    flex-wrap: wrap-reverse;
     gap: 1rem;
 }
 
@@ -70,7 +73,8 @@ a:hover {
 }
 
 .gift-name {
-    text-transform: capitalize;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
 .gift-name-and-price {
@@ -97,6 +101,7 @@ a:hover {
     color: black;
     cursor: pointer;
     display: inline-block;
+    flex: none;
     font-size: 0.875rem;
     font-weight: normal;
     line-height: 1;
@@ -140,21 +145,17 @@ a:hover {
     gap: 2rem;
 }
 
-.edit-list-gifts .gift-description {
-    max-height: 6rem;
-    overflow: auto;
-}
-
 code {
     font-family: 'Courier New', Courier, monospace;
+    word-break: break-all;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
+    gap: 1rem;
 }
 
 .menu-button {
-    flex: none;
     margin-top: 0.5rem;
 }
