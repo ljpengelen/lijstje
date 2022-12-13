@@ -66,10 +66,12 @@ a:hover {
 }
 
 .gift {
+    background-color: rgb(237 245 247);
+    border-radius: 0.5rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    margin: 1rem 0;
+    padding: 1.5rem;
 }
 
 .gift-name {
