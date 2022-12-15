@@ -96,7 +96,8 @@
        [:p "Deel de volgende URL met anderen. Zij kunnen dan je lijstje bekijken en cadeau's reserveren."]
        [:code (str (:host env) "/list/" public-external-id "/view")]]
       [:div {:class "edit-list-gifts"}
-       (when (empty? gifts) [:p "Dit verlanglijstje bevat nog geen cadeau's."])
+       (when (empty? gifts)
+         [:p {:class "no-gifts"} "Dit verlanglijstje bevat nog geen cadeau's."])
        (for [{:keys [external-id name description price]} gifts]
          [:div {:class "gift"}
           [:div {:class "gift-name-and-price"}
