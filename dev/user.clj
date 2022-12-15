@@ -4,6 +4,7 @@
             [lijstje.migrations :as migrations]
             [lijstje.server :as server]
             [migratus.core :as migratus]))
+
 (comment
   (server/start!)
   (browse-url "http://localhost:3000/")

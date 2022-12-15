@@ -1,0 +1,17 @@
+{:customREPLCommandSnippets
+ [{:name "Run migrations"
+   :snippet "(migrations/migrate!)"
+   :ns "user"
+   :key "m"}
+  {:name "Start server"
+   :snippet (server/start!)
+   :ns "user"
+   :key "s"}
+  {:name "Browse to URL"
+   :snippet (browse-url "http://localhost:3000/")
+   :ns "user"
+   :key "b"}
+  {:name "Stop server"
+   :snippet (server/stop!)
+   :ns "user"
+   :key "h"}]}
