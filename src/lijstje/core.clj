@@ -3,6 +3,7 @@
             [lijstje.server :as server])
   (:gen-class))
 
-(defn -main [& _]
-  (migrations/migrate!)
-  (server/start!))
+(defn -main [& args]
+  (if (some #{"migrate"} args)
+    (migrations/migrate!)
+    (server/start!)))

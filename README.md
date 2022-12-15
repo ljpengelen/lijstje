@@ -22,3 +22,8 @@ Obviously, this requires Clojure.
 
 Alternatively, run `clojure -T:build clean && clojure -T:build uber` to create an uberjar, followed by `java -jar target/lijstje-<version>-standalone.jar` to start the application.
 Starting the application like this doesn't require Clojure, only Java.
+
+## Running migrations
+
+Use `clojure -M -m lijstje.core migrate` to run migrations via Clojure.
+Use `java -jar target/lijstje-<version>-standalone.jar migrate` to run migrations via Java.
