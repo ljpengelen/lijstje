@@ -30,7 +30,8 @@ RUN groupadd -g 999 appuser \
   && useradd -r -u 999 -g appuser appuser -s /bin/false
 RUN chown -R appuser:appuser /app
 
-COPY --from=build /build/CHECKS .
+COPY --from=build /build/dokku/CHECKS .
+COPY --from=build /build/dokku/app.json .
 
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
