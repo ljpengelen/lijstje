@@ -1,13 +1,10 @@
 (ns lijstje.routes
-  (:require [config.core :refer [env]]
-            [lijstje.domain :as domain]
-            [lijstje.handlers :as h]
+  (:require [lijstje.handlers :as h]
             [reitit.ring :as ring]
             [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]
-            [ring.middleware.session :refer [wrap-session]]
-            [ring.middleware.session.cookie :refer [cookie-store]]))
+            [ring.middleware.session :refer [wrap-session]]))
 
 (defn wrap-pretty-exceptions [handler]
   (fn [request]
@@ -31,9 +28,7 @@
   (fn [request]
     (handler state request)))
 
-(def store (cookie-store {:key (domain/hex-string->bytes (:cookie-key env))}))
-
-(defn app [state]
+(defn app [{:keys [cookie-store] :as state}]
   (ring/ring-handler
    (ring/router
     [["/" {:get h/render-create-list-page
@@ -62,7 +57,7 @@
                          wrap-params
                          wrap-keyword-params
                          wrap-no-caching
-                         [wrap-session {:store store}]
+                         [wrap-session {:store cookie-store}]
                          [wrap-anti-forgery {:error-response h/invalid-request-page}]
                          [wrap-state state]]}})
    (ring/routes
