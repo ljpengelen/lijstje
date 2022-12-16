@@ -289,7 +289,12 @@
 
 (def internal-server-error-page
   (page
-   [:h1 "Onverwachte fout"]))
+   [:h1 "Onverwachte fout"]
+   [:p
+    "Er is een onverwachte fout opgetreden. "
+    "Wij zijn direct op de hoogte gebracht van deze fout "
+    "en gaan op zoek naar een oplossing. "
+    "Excuses voor het ongemak!"]))
 
 (defn handle-exception [exception capture-exception!]
   (if (and
