@@ -1,5 +1,6 @@
 (ns lijstje.handlers 
   (:require [clojure.string :as string]
+            [clojure.tools.logging :refer [error]]
             [hiccup.core :refer [h]]
             [hiccup.form :as form]
             [hiccup.page :as hp]
@@ -297,7 +298,7 @@
     (render-domain-exception-page exception)
     (do
       (capture-exception! exception)
-      (println exception)
+      (error exception)
       internal-server-error-page)))
 
 (def invalid-request-page
