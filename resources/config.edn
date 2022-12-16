@@ -1,4 +1,6 @@
 {:cookie-key "3d3d93b4c9bc8aa07d2d0c2acd87e7c3"
  :host "http://localhost:3000"
  :jdbc-url "jdbc:sqlite:lijstje.db"
+ :sentry {:dsn "https://0558cdf365fd41e2a5659153efffed5b@o136594.ingest.sentry.io/4504338231853056"
+          :environment "dev"}
  :port 3000}

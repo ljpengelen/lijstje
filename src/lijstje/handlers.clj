@@ -290,6 +290,16 @@
   (page
    [:h1 "Onverwachte fout"]))
 
+(defn handle-exception [exception capture-exception!]
+  (if (and
+       (instance? clojure.lang.ExceptionInfo exception)
+       (:ui-message (ex-data exception)))
+    (render-domain-exception-page exception)
+    (do
+      (capture-exception! exception)
+      (println exception)
+      internal-server-error-page)))
+
 (def invalid-request-page
   (page
    [:h1 "Ongeldig verzoek"]))
