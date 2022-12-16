@@ -3,19 +3,23 @@
    :snippet "(migrations/migrate!)"
    :ns "user"
    :key "m"}
-  {:name "Start server"
+  {:name "Start app"
    :snippet (go)
    :ns "user"
    :key "s"}
-  {:name "Browse to URL"
+  {:name "Open app in browser"
    :snippet (browse-url "http://localhost:3000/")
    :ns "user"
    :key "b"}
-    {:name "Restart server"
+    {:name "Restart app"
      :snippet (reset)
      :ns "user"
      :key "r"}
-  {:name "Stop server"
+  {:name "Automatically restart app"
+   :snippet (start-auto-reset {:relevant-file? (constantly true)})
+   :ns "user"
+   :key "a"}
+  {:name "Stop app"
    :snippet (halt)
    :ns "user"
    :key "h"}]}
