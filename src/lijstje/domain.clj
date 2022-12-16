@@ -43,72 +43,56 @@
   (new-list "Lijstje van Luc")
   (new-gift 1 "Koffiebonen" "10,-" "Bruin"))
 
-(defn create-list! [name]
+(defn create-list! [datasource name]
   (let [list (new-list name)]
-    (db/create-list! db/ds list)))
+    (db/create-list! datasource list)))
 
-(comment
-  (create-list! "Kerst Luc"))
-
-(defn create-gift! [private-list-id name price description]
-  (if-let [{:keys [list-id]} (db/get-list-by-private-id db/ds {:id private-list-id})]
+(defn create-gift! [datasource private-list-id name price description]
+  (if-let [{:keys [list-id]} (db/get-list-by-private-id datasource {:id private-list-id})]
     (let [gift (new-gift list-id name price description)]
-      (db/create-gift! db/ds gift))
+      (db/create-gift! datasource gift))
     (throw (ex-info "List not found" {:ui-message "Deze lijst bestaat niet."}))))
 
-(comment
-  (create-gift! 1 "Koffiebonen" "10,-" "Bruin"))
-
-(defn extend-list-with-gifts [{:keys [list-id] :as list}]
-  (let [gifts (db/get-gifts-by-list-id db/ds {:id list-id})]
+(defn extend-list-with-gifts [datasource {:keys [list-id] :as list}]
+  (let [gifts (db/get-gifts-by-list-id datasource {:id list-id})]
     (assoc list :gifts gifts)))
 
-(defn get-list-by-public-id [id]
-  (if-let [list (db/get-list-by-public-id db/ds {:id id})]
-    (extend-list-with-gifts list)
+(defn get-list-by-public-id [datasource id]
+  (if-let [list (db/get-list-by-public-id datasource {:id id})]
+    (extend-list-with-gifts datasource list)
     (throw (ex-info "List not found" {:ui-message "Deze lijst bestaat niet."}))))
 
-(defn get-list-by-private-id [id]
-  (if-let [list (db/get-list-by-private-id db/ds {:id id})]
-    (extend-list-with-gifts list)
+(defn get-list-by-private-id [datasource id]
+  (if-let [list (db/get-list-by-private-id datasource {:id id})]
+    (extend-list-with-gifts datasource list)
     (throw (ex-info "List not found" {:ui-message "Deze lijst bestaat niet."}))))
 
-(comment
-  (get-list-by-public-id "812b098ce4bd6725")
-  (get-list-by-private-id "38719a1be66a15e6"))
+(defn get-all-lists [datasource]
+  (for [list (db/get-all-lists datasource)]
+    (extend-list-with-gifts datasource list)))
 
-(defn get-all-lists []
-  (for [list (db/get-all-lists db/ds)]
-    (extend-list-with-gifts list)))
-
-(comment
-  (get-all-lists))
-
-(defn get-gift [external-id]
-  (if-let [gift (db/get-gift-by-external-id db/ds {:id external-id})]
+(defn get-gift [datasource external-id]
+  (if-let [gift (db/get-gift-by-external-id datasource {:id external-id})]
     gift
     (throw (ex-info "Gift not found" {:ui-message "Dit cadeau bestaat niet."}))))
 
-(defn reserve-gift! [external-id reserved-by]
-  (db/reserve-gift! db/ds {:external-id external-id
-                           :reserved-by reserved-by
-                           :reserved-at (str (java.time.Instant/now))}))
+(defn reserve-gift! [datasource external-id reserved-by]
+  (db/reserve-gift! datasource {:external-id external-id
+                                :reserved-by reserved-by
+                                :reserved-at (str (java.time.Instant/now))}))
 
-(comment
-  (reserve-gift! "c544781ff5411936" "Kerstman"))
+(defn cancel-gift-reservation! [datasource external-id]
+  (db/cancel-gift-reservation! datasource {:external-id external-id}))
 
-(defn cancel-gift-reservation! [external-id]
-  (db/cancel-gift-reservation! db/ds {:external-id external-id}))
+(defn delete-list! [datasource private-list-id]
+  (db/delete-gifts-by-private-list-id! datasource {:id private-list-id})
+  (db/delete-list-by-private-id! datasource {:id private-list-id}))
 
-(defn delete-list! [private-list-id]
-  (db/delete-gifts-by-private-list-id! db/ds {:id private-list-id})
-  (db/delete-list-by-private-id! db/ds {:id private-list-id}))
+(defn update-gift! [datasource external-id name price description]
+  (db/update-gift! datasource {:id external-id
+                               :name name
+                               :price price
+                               :description description}))
 
-(defn update-gift! [external-id name price description]
-  (db/update-gift! db/ds {:id external-id
-                          :name name
-                          :price price
-                          :description description}))
-
-(defn delete-gift! [external-id]
-  (db/delete-gift! db/ds {:id external-id}))
+(defn delete-gift! [datasource external-id]
+  (db/delete-gift! datasource {:id external-id}))

@@ -1,6 +1,5 @@
 (ns lijstje.handlers 
   (:require [clojure.string :as string]
-            [config.core :refer [env]]
             [hiccup.core :refer [h]]
             [hiccup.form :as form]
             [hiccup.page :as hp]
@@ -61,7 +60,7 @@
   #_{:clj-kondo/ignore [:invalid-arity]}
   (form/submit-button {:class "button" :name :ok} text))
 
-(defn render-create-list-page [_]
+(defn render-create-list-page [_ _]
   (page
    [:h1 "Maak een nieuw verlanglijstje"]
    (form/form-to
@@ -71,9 +70,9 @@
      (form/text-field {:maxlength 100 :required true} :name)]
     (confirmation-button "Maak nieuwe lijst"))))
 
-(defn create-list [request]
+(defn create-list [{:keys [datasource]} request]
   (let [name (-> request :params :name)
-        {:keys [private-external-id]} (domain/create-list! name)]
+        {:keys [private-external-id]} (domain/create-list! datasource name)]
     (response/redirect (str "/list/" private-external-id "/edit") :see-other)))
 
 (defn primary-button-link [url text]
@@ -82,9 +81,10 @@
 (defn secondary-button-link [url text]
   [:a {:class "secondary-button" :href url} text])
 
-(defn render-edit-list-page [request]
+(defn render-edit-list-page [{:keys [datasource host]} request]
   (let [{:keys [external-list-id]} (:path-params request)
-        {:keys [name gifts public-external-id]} (domain/get-list-by-private-id external-list-id)]
+        {:keys [name gifts public-external-id]}
+        (domain/get-list-by-private-id datasource external-list-id)]
     (page
      [:h1 "Bewerk verlanglijstje " (h name)]
      [:div {:class "edit-list"}
@@ -94,7 +94,7 @@
         "Het is de enige manier om later je lijstje aan te passen of te "
         [:a {:href (str "/list/" external-list-id "/delete")} "verwijderen"] "."]
        [:p "Deel de volgende URL met anderen. Zij kunnen dan je lijstje bekijken en cadeau's reserveren."]
-       [:code (str (:host env) "/list/" public-external-id "/view")]]
+       [:code (str host "/list/" public-external-id "/view")]]
       [:div {:class "edit-list-gifts"}
        (when (empty? gifts)
          [:p {:class "no-gifts"} "Dit verlanglijstje bevat nog geen cadeau's."])
@@ -112,9 +112,9 @@
 (defn cancellation-button [url text]
   (secondary-button-link url text))
 
-(defn render-delete-list-page [request]
+(defn render-delete-list-page [{:keys [datasource]} request]
   (let [{:keys [external-list-id]} (:path-params request)
-        {:keys [name]} (domain/get-list-by-private-id external-list-id)]
+        {:keys [name]} (domain/get-list-by-private-id datasource external-list-id)]
     (page
      [:h1 "Verwijder " (h name)]
      [:p
@@ -127,16 +127,16 @@
        (cancellation-button (str "/list/" external-list-id "/edit") "Nee, ga terug")
        (confirmation-button "Ja, verwijder lijst")]))))
 
-(defn delete-list [request]
+(defn delete-list [{:keys [datasource]} request]
   (let [{:keys [external-list-id]} (:path-params request)
         {:keys [ok]} (:params request)]
     (when ok
-      (domain/delete-list! external-list-id))
+      (domain/delete-list! datasource external-list-id))
     (response/redirect "/" :see-other)))
 
-(defn render-view-list-page [request]
+(defn render-view-list-page [{:keys [datasource]} request]
   (let [{:keys [external-list-id]} (:path-params request)
-        {:keys [name gifts]} (domain/get-list-by-public-id external-list-id)]
+        {:keys [name gifts]} (domain/get-list-by-public-id datasource external-list-id)]
     (page
      [:div {:class "header"}
       [:h1 "Ver&shy;lang&shy;lijst&shy;je " (h name)]
@@ -153,7 +153,7 @@
            [:a {:class "button" :href (str "/list/" external-list-id "/view/gift/" external-id "/cancel-reservation")} "Maak reservering ongedaan"]
            [:a {:class "button" :href (str "/list/" external-list-id "/view/gift/" external-id "/reserve")} "Reserveer cadeau"])])])))
 
-(defn render-create-gift-page [request]
+(defn render-create-gift-page [_ request]
   (let [{:keys [external-list-id]} (:path-params request)]
     (page
      [:h1 "Voeg een cadeau toe"]
@@ -173,16 +173,16 @@
        (cancellation-button (str "/list/" external-list-id "/edit") "Ga terug")
        (confirmation-button "Voeg cadeau toe")]))))
 
-(defn create-gift [request]
+(defn create-gift [{:keys [datasource]} request]
   (let [{:keys [external-list-id]} (:path-params request)
         {:keys [name ok price description]} (:params request)]
     (when ok
-      (domain/create-gift! external-list-id name price description))
+      (domain/create-gift! datasource external-list-id name price description))
     (response/redirect (str "/list/" external-list-id "/edit") :see-other)))
 
-(defn render-edit-gift-page [request]
+(defn render-edit-gift-page [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
-        {:keys [name price description]} (domain/get-gift external-gift-id)]
+        {:keys [name price description]} (domain/get-gift datasource external-gift-id)]
     (page
      [:h1 "Bewerk " (h name)]
      [:p
@@ -202,16 +202,16 @@
        (cancellation-button (str "/list/" external-list-id "/edit") "Ga terug")
        (confirmation-button "Sla wijzigingen op")]))))
 
-(defn update-gift [request]
+(defn update-gift [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
         {:keys [name ok price description]} (:params request)]
     (when ok
-      (domain/update-gift! external-gift-id name price description))
+      (domain/update-gift! datasource external-gift-id name price description))
     (response/redirect (str "/list/" external-list-id "/edit") :see-other)))
 
-(defn render-delete-gift-page [request]
+(defn render-delete-gift-page [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
-        {:keys [name]} (domain/get-gift external-gift-id)]
+        {:keys [name]} (domain/get-gift datasource external-gift-id)]
     (page
      [:h1 "Verwijder " (h name)]
      [:p "Weet je zeker dat je het cadeau \"" (h name) "\" wilt verwijderen?"]
@@ -222,16 +222,16 @@
        (cancellation-button (str "/list/" external-list-id "/edit") "Nee, ga terug")
        (confirmation-button "Ja, verwijder cadeau")]))))
 
-(defn delete-gift [request]
+(defn delete-gift [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
         {:keys [ok]} (:params request)]
     (when ok
-      (domain/delete-gift! external-gift-id))
+      (domain/delete-gift! datasource external-gift-id))
     (response/redirect (str "/list/" external-list-id "/edit") :see-other)))
 
-(defn render-reserve-gift-page [request]
+(defn render-reserve-gift-page [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
-        {:keys [name]} (domain/get-gift external-gift-id)]
+        {:keys [name]} (domain/get-gift datasource external-gift-id)]
     (page
      [:h1 "Reserveer " (h name)]
      [:p
@@ -250,16 +250,16 @@
        #_ {:clj-kondo/ignore [:invalid-arity]}
        (form/submit-button {:class "button" :name :ok} "Reserveer cadeau")]))))
 
-(defn reserve-gift [request]
+(defn reserve-gift [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
         {:keys [ok reserved-by]} (:params request)]
     (when ok
-      (domain/reserve-gift! external-gift-id reserved-by))
+      (domain/reserve-gift! datasource external-gift-id reserved-by))
     (response/redirect (str "/list/" external-list-id "/view") :see-other)))
 
-(defn render-cancel-gift-reservation-page [request]
+(defn render-cancel-gift-reservation-page [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
-        {:keys [name reserved-by]} (domain/get-gift external-gift-id)]
+        {:keys [name reserved-by]} (domain/get-gift datasource external-gift-id)]
     (page
      [:h1 "Annuleer reservering van " (h name)]
      [:p
@@ -273,11 +273,11 @@
        #_ {:clj-kondo/ignore [:invalid-arity]}
        (form/submit-button {:class "button" :name :ok} "Ja, maak reservering ongedaan")]))))
 
-(defn cancel-gift-reservation [request]
+(defn cancel-gift-reservation [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
         {:keys [ok]} (:params request)]
     (when ok
-      (domain/cancel-gift-reservation! external-gift-id))
+      (domain/cancel-gift-reservation! datasource external-gift-id))
     (response/redirect (str "/list/" external-list-id "/view") :see-other)))
 
 (defn render-domain-exception-page [exception]

@@ -4,14 +4,18 @@
    :ns "user"
    :key "m"}
   {:name "Start server"
-   :snippet (server/start!)
+   :snippet (go)
    :ns "user"
    :key "s"}
   {:name "Browse to URL"
    :snippet (browse-url "http://localhost:3000/")
    :ns "user"
    :key "b"}
+    {:name "Restart server"
+     :snippet (reset)
+     :ns "user"
+     :key "r"}
   {:name "Stop server"
-   :snippet (server/stop!)
+   :snippet (halt)
    :ns "user"
    :key "h"}]}

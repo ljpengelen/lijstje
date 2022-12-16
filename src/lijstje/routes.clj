@@ -27,9 +27,13 @@
   (fn [request]
     (no-caching-response (handler request))))
 
+(defn wrap-state [handler state]
+  (fn [request]
+    (handler state request)))
+
 (def store (cookie-store {:key (domain/hex-string->bytes (:cookie-key env))}))
 
-(def app
+(defn app [state]
   (ring/ring-handler
    (ring/router
     [["/" {:get h/render-create-list-page
@@ -44,7 +48,7 @@
                      :post h/reserve-gift}]
         ["/cancel-reservation" {:get h/render-cancel-gift-reservation-page
                                 :post h/cancel-gift-reservation}]]]
-      ["/edit" 
+      ["/edit"
        ["" h/render-edit-list-page]
        ["/gift"
         ["" {:get h/render-create-gift-page
@@ -59,7 +63,8 @@
                          wrap-keyword-params
                          wrap-no-caching
                          [wrap-session {:store store}]
-                         [wrap-anti-forgery {:error-response h/invalid-request-page}]]}})
+                         [wrap-anti-forgery {:error-response h/invalid-request-page}]
+                         [wrap-state state]]}})
    (ring/routes
     (ring/create-resource-handler
      {:path "/"})

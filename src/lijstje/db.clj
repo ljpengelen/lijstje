@@ -1,6 +1,5 @@
 (ns lijstje.db
-  (:require [config.core :refer [env]]
-            [hugsql.adapter.next-jdbc :as next-adapter]
+  (:require [hugsql.adapter.next-jdbc :as next-adapter]
             [hugsql.core :as hugsql]))
 
 (hugsql/set-adapter! (next-adapter/hugsql-adapter-next-jdbc))
@@ -11,5 +10,3 @@
          get-gift-by-external-id reserve-gift! cancel-gift-reservation!
          delete-list-by-private-id! delete-gifts-by-private-list-id!
          update-gift! delete-gift!)
-
-(def ds (:jdbc-url env))
