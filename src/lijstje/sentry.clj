@@ -16,5 +16,6 @@
 (defn init! [dsn environment]
   (Sentry/init (configurer dsn environment))
   (reify SentryClient
-    (capture-exception! [_ exception]
-      (Sentry/captureException exception))))
+    (capture-exception!
+     [_ exception]
+     (Sentry/captureException exception))))
