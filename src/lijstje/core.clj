@@ -1,5 +1,6 @@
 (ns lijstje.core
-  (:require [config.core :refer [env]]
+  (:require [clojure.tools.logging :as logger]
+            [config.core :refer [env]]
             [integrant.core :as ig]
             [lijstje.db :as db]
             [lijstje.domain :as domain]
@@ -35,9 +36,21 @@
 (defmethod ig/init-key ::sentry [_ {:keys [dsn environment]}]
   (sentry/init! dsn environment))
 
+(defn error-logger [message exception]
+  (clojure.tools.logging/error exception message)
+  (sentry/capture! exception))
+
+(defn warning-logger [message exception]
+  (clojure.tools.logging/warn exception message)
+  (sentry/capture! exception))
+
 (defmethod ig/init-key ::server [_ {:keys [port] :as state}]
-  (let [state (dissoc state :db-fns :port :sentry)]
-    (http-kit/run-server (app state) {:port port :join? false})))
+  (let [state (dissoc state :db-fns :port :sentry)
+        options {:error-logger error-logger
+                 :warn-logger warning-logger
+                 :join? false
+                 :port port}]
+    (http-kit/run-server (app state) options)))
 
 (defmethod ig/halt-key! ::server [_ server]
   (server))
