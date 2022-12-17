@@ -15,15 +15,13 @@
   {::cookie-store {:cookie-key (:cookie-key env)}
    ::datasource {:jdbc-url (:jdbc-url env)}
    ::db-fns nil
-   ::logging {:sentry-client (ig/ref ::sentry-client)}
+   ::logger {:sentry-client (ig/ref ::sentry-client)}
    ::sentry-client (:sentry env)
    ::server {:cookie-store (ig/ref ::cookie-store)
              :datasource (ig/ref ::datasource)
              :db-fns (ig/ref ::db-fns)
              :host (:host env)
-             :log-error! (partial logging/log-error! sentry/capture-exception!)
-             :log-warning! (partial logging/log-warning! sentry/capture-exception!)
-             :logging (ig/ref ::logging)
+             :logger (ig/ref ::logger)
              :port (:port env)}})
 
 (defmethod ig/init-key ::db-fns [_ _]
@@ -35,16 +33,23 @@
 (defmethod ig/init-key ::datasource [_ {:keys [jdbc-url]}]
   jdbc-url)
 
-(defmethod ig/init-key ::logging [_ {:keys [sentry-client]}]
+(defmethod ig/init-key ::logger [_ {:keys [sentry-client]}]
   (logging/init! sentry-client))
 
 (defmethod ig/init-key ::sentry-client [_ {:keys [dsn environment]}]
   (sentry/init! dsn environment))
 
-(defmethod ig/init-key ::server [_ {:keys [log-error! log-warning! port] :as state}]
-  (let [state (dissoc state :db-fns :logging :port)
-        options {:error-logger log-error!
-                 :warn-logger log-warning!
+(defn error-logger [logger]
+  (fn [message exception]
+    (logging/log-error! logger message exception)))
+
+(defn warn-logger [logger]
+  (fn [message exception]
+    (logging/log-warning! logger message exception)))
+
+(defmethod ig/init-key ::server [_ {:keys [logger port] :as state}]
+  (let [options {:error-logger (error-logger logger)
+                 :warn-logger (warn-logger logger)
                  :join? false
                  :port port}]
     (http-kit/run-server (app state) options)))

@@ -4,6 +4,7 @@
             [hiccup.form :as form]
             [hiccup.page :as hp]
             [lijstje.domain :as domain]
+            [lijstje.logging :as logging]
             [ring.util.anti-forgery :refer [anti-forgery-field]]
             [ring.util.response :as response])
    (:import [org.nibor.autolink LinkExtractor LinkSpan LinkType]))
@@ -295,13 +296,13 @@
     "en gaan op zoek naar een oplossing. "
     "Excuses voor het ongemak!"]))
 
-(defn handle-exception [exception log-error!]
+(defn handle-exception [exception logger]
   (if (and
        (instance? clojure.lang.ExceptionInfo exception)
        (:ui-message (ex-data exception)))
     (render-domain-exception-page exception)
     (do
-      (log-error! "Unexpected exception" exception)
+      (logging/log-error! logger "Unexpected exception" exception)
       internal-server-error-page)))
 
 (def invalid-request-page

@@ -6,12 +6,12 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.session :refer [wrap-session]]))
 
-(defn wrap-pretty-exceptions [handler log-error!]
+(defn wrap-pretty-exceptions [handler logger]
   (fn [request]
     (try
       (handler request)
       (catch Exception e
-        (h/handle-exception e log-error!)))))
+        (h/handle-exception e logger)))))
 
 (defn no-caching-response [response]
   (assoc-in response [:headers "Cache-Control"] "no-cache, no-store"))
@@ -24,7 +24,7 @@
   (fn [request]
     (handler state request)))
 
-(defn app [{:keys [cookie-store log-error!] :as state}]
+(defn app [{:keys [cookie-store logger] :as state}]
   (ring/ring-handler
    (ring/router
     [["/" {:get h/render-create-list-page
@@ -49,7 +49,7 @@
                    :post h/update-gift}]
          ["/delete" {:get h/render-delete-gift-page
                      :post h/delete-gift}]]]]]]
-    {:data {:middleware [[wrap-pretty-exceptions log-error!]
+    {:data {:middleware [[wrap-pretty-exceptions logger]
                          wrap-params
                          wrap-keyword-params
                          wrap-no-caching
