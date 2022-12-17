@@ -1,6 +1,5 @@
 (ns lijstje.handlers 
   (:require [clojure.string :as string]
-            [clojure.tools.logging :refer [error]]
             [hiccup.core :refer [h]]
             [hiccup.form :as form]
             [hiccup.page :as hp]
@@ -296,14 +295,13 @@
     "en gaan op zoek naar een oplossing. "
     "Excuses voor het ongemak!"]))
 
-(defn handle-exception [exception capture-exception!]
+(defn handle-exception [exception log-error!]
   (if (and
        (instance? clojure.lang.ExceptionInfo exception)
        (:ui-message (ex-data exception)))
     (render-domain-exception-page exception)
     (do
-      (capture-exception! exception)
-      (error exception)
+      (log-error! "Unexpected exception" exception)
       internal-server-error-page)))
 
 (def invalid-request-page
