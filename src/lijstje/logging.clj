@@ -1,20 +1,21 @@
 (ns lijstje.logging
-  (:require [clojure.tools.logging :as log]))
+  (:require [clojure.tools.logging :as log]
+            [lijstje.sentry :as sentry]))
 
-(defn log-error! [capture-exception! message throwable]
+(defn log-error! [sentry-client message throwable]
   (log/error throwable message)
-  (capture-exception! throwable))
+  (sentry/capture-exception! sentry-client throwable))
 
-(defn log-warning! [capture-exception! message throwable]
+(defn log-warning! [sentry-client message throwable]
   (log/warn throwable message)
-  (capture-exception! throwable))
+  (sentry/capture-exception! sentry-client throwable))
 
-(defn uncaught-exception-handler [capture-exception!]
+(defn uncaught-exception-handler [sentry-client]
   (reify Thread$UncaughtExceptionHandler
     (uncaughtException [_ thread exception]
       (let [message (str "Uncaught exception on thread " (.getName thread))]
-        (log-error! capture-exception! message exception)))))
+        (log-error! sentry-client message exception)))))
 
-(defn init! [capture-exception!]
+(defn init! [sentry-client]
   (Thread/setDefaultUncaughtExceptionHandler
-   (uncaught-exception-handler capture-exception!)))
+   (uncaught-exception-handler sentry-client)))

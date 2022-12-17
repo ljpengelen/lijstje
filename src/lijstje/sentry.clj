@@ -1,6 +1,9 @@
 (ns lijstje.sentry
   (:import [io.sentry Sentry Sentry$OptionsConfiguration]))
 
+(defprotocol SentryClient
+  (capture-exception! [this exception]))
+
 (defn configurer [dsn environment]
   (reify Sentry$OptionsConfiguration
     (configure [_ options]
@@ -11,7 +14,7 @@
         (.setDebug true)))))
 
 (defn init! [dsn environment]
-  (Sentry/init (configurer dsn environment)))
-
-(defn capture-exception! [exception]
-  (Sentry/captureException exception))
+  (Sentry/init (configurer dsn environment))
+  (reify SentryClient
+    (capture-exception! [_ exception]
+      (Sentry/captureException exception))))

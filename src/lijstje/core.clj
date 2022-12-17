@@ -15,9 +15,8 @@
   {::cookie-store {:cookie-key (:cookie-key env)}
    ::datasource {:jdbc-url (:jdbc-url env)}
    ::db-fns nil
-   ::logging {:capture-exception! sentry/capture-exception!
-              :sentry (ig/ref ::sentry)}
-   ::sentry (:sentry env)
+   ::logging {:sentry-client (ig/ref ::sentry-client)}
+   ::sentry-client (:sentry env)
    ::server {:cookie-store (ig/ref ::cookie-store)
              :datasource (ig/ref ::datasource)
              :db-fns (ig/ref ::db-fns)
@@ -36,10 +35,10 @@
 (defmethod ig/init-key ::datasource [_ {:keys [jdbc-url]}]
   jdbc-url)
 
-(defmethod ig/init-key ::logging [_ {:keys [capture-exception!]}]
-  (logging/init! capture-exception!))
+(defmethod ig/init-key ::logging [_ {:keys [sentry-client]}]
+  (logging/init! sentry-client))
 
-(defmethod ig/init-key ::sentry [_ {:keys [dsn environment]}]
+(defmethod ig/init-key ::sentry-client [_ {:keys [dsn environment]}]
   (sentry/init! dsn environment))
 
 (defmethod ig/init-key ::server [_ {:keys [log-error! log-warning! port] :as state}]
