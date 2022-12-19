@@ -15,12 +15,13 @@
   {::cookie-store {:cookie-key (:cookie-key env)}
    ::datasource {:jdbc-url (:jdbc-url env)}
    ::db-fns nil
+   ::handler {:cookie-store (ig/ref ::cookie-store)
+              :datasource (ig/ref ::datasource)
+              :host (:host env)
+              :logger (ig/ref ::logger)}
    ::logger {:sentry-client (ig/ref ::sentry-client)}
    ::sentry-client (:sentry env)
-   ::server {:cookie-store (ig/ref ::cookie-store)
-             :datasource (ig/ref ::datasource)
-             :db-fns (ig/ref ::db-fns)
-             :host (:host env)
+   ::server {:handler (ig/ref ::handler)
              :logger (ig/ref ::logger)
              :port (:port env)}})
 
@@ -39,6 +40,9 @@
 (defmethod ig/init-key ::sentry-client [_ {:keys [dsn environment]}]
   (sentry/init! dsn environment))
 
+(defmethod ig/init-key ::handler [_ state]
+  (app state))
+
 (defn error-logger [logger]
   (fn [message exception]
     (logging/log-error! logger message exception)))
@@ -47,12 +51,12 @@
   (fn [message exception]
     (logging/log-warning! logger message exception)))
 
-(defmethod ig/init-key ::server [_ {:keys [logger port] :as state}]
+(defmethod ig/init-key ::server [_ {:keys [handler logger port]}]
   (let [options {:error-logger (error-logger logger)
                  :warn-logger (warn-logger logger)
                  :join? false
                  :port port}]
-    (http-kit/run-server (app state) options)))
+    (http-kit/run-server handler options)))
 
 (defmethod ig/halt-key! ::server [_ server]
   (server))
