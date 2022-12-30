@@ -15,8 +15,7 @@ RUN clojure -M -e "(prn \"Downloading deps\")"
 RUN clojure -M:build -e "(prn \"Downloading deps\")"
 
 COPY . .
-RUN clojure -T:build clean
-RUN clojure -T:build uber
+RUN clojure -X:uberjar
 RUN cp target/lijstje-*-standalone.jar /build/lijstje-standalone.jar
 
 FROM debian:buster-slim
