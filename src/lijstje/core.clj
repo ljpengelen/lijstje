@@ -54,7 +54,6 @@
 (defmethod ig/init-key ::server [_ {:keys [handler logger port]}]
   (let [options {:error-logger (error-logger logger)
                  :warn-logger (warn-logger logger)
-                 :join? false
                  :port port}]
     (http-kit/run-server handler options)))
 
