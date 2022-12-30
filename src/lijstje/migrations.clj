@@ -5,7 +5,7 @@
 (def config {:store :database
              :db {:connection-uri (:jdbc-url env)}})
 
-(defn migrate! []
+(defn migrate! [& _]
   (migratus/migrate config))
 
 (defn rollback! []

@@ -19,9 +19,11 @@
         ring/ring-devel {:mvn/version "1.9.5"}
         yogthos/config {:mvn/version "1.1.8"}}
  :ns-default lijstje.core
- :aliases {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.1" :git/sha "7d40500"}}
-                   :ns-default build}
-           :dev {:extra-deps {integrant/repl {:mvn/version "0.3.2"}
+ :aliases {:dev {:extra-deps {integrant/repl {:mvn/version "0.3.2"}
                               io.github.ljpengelen/integrant-repl-autoreload {:git/sha "2ae624990a7039184c2494546e3704155e9b353c"}}
                  :extra-paths ["dev"]}
-           :run {:exec-fn lijstje.core/-main}}}
+           :migrate {:exec-fn lijstje.migrations/migrate!}
+           :run {:exec-fn lijstje.core/-main}
+           :uberjar {:paths ["."]
+                     :deps {io.github.clojure/tools.build {:git/tag "v0.8.1" :git/sha "7d40500"}}
+                     :exec-fn build/uber}}}

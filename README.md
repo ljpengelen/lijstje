@@ -20,10 +20,10 @@ A convenient way to get started is opening `dev/user.clj` and evaluating express
 Run `clojure -X:run` to start the app.
 Obviously, this requires Clojure.
 
-Alternatively, run `clojure -T:build clean && clojure -T:build uber` to create an uberjar, followed by `java -jar target/lijstje-<version>-standalone.jar` to start the application.
+Alternatively, run `clojure -X:uberjar` to create an uberjar, followed by `java -jar target/lijstje-<version>-standalone.jar` to start the application.
 Starting the application like this doesn't require Clojure, only Java.
 
 ## Running migrations
 
-Use `clojure -M -m lijstje.core migrate` to run migrations via Clojure.
+Use `clojure -X:migrate` to run migrations via Clojure.
 Use `java -jar target/lijstje-<version>-standalone.jar migrate` to run migrations via Java.
