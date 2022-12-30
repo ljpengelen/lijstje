@@ -11,8 +11,8 @@ RUN $JAVA_HOME/bin/jlink \
          --output /build/javaruntime
 
 COPY deps.edn .
-RUN clojure -M -e "(prn \"Downloading deps\")"
-RUN clojure -M:build -e "(prn \"Downloading deps\")"
+RUN clojure -P -X:run
+RUN clojure -P -X:uberjar
 
 COPY . .
 RUN clojure -X:uberjar
