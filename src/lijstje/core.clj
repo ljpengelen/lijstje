@@ -52,9 +52,12 @@
     (logging/log-warning! logger message exception)))
 
 (defmethod ig/init-key ::server [_ {:keys [handler logger port]}]
-  (let [options {:error-logger (error-logger logger)
+  (let [threads (* 2 (.availableProcessors (Runtime/getRuntime)))
+        options {:error-logger (error-logger logger)
                  :warn-logger (warn-logger logger)
-                 :port port}]
+                 :port port
+                 :thread threads}]
+    (logging/log-info! logger (str "Number of threads used: " threads))
     (http-kit/run-server handler options)))
 
 (defmethod ig/halt-key! ::server [_ server]

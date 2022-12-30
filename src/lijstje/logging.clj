@@ -3,6 +3,7 @@
             [lijstje.sentry :as sentry]))
 
 (defprotocol Logger
+  (log-info! [this message])
   (log-error! [this message throwable])
   (log-warning! [this message throwable]))
 
@@ -14,10 +15,13 @@
 
 (defn init! [sentry-client]
   (let [logger (reify Logger
+                 (log-info!
+                   [_ message]
+                   (log/info message))
                  (log-error!
-                  [_ message throwable]
-                  (log/error throwable message)
-                  (sentry/capture-exception! sentry-client throwable))
+                   [_ message throwable]
+                   (log/error throwable message)
+                   (sentry/capture-exception! sentry-client throwable))
                  (log-warning!
                    [_ message throwable]
                    (log/warn throwable message)
