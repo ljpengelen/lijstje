@@ -1,11 +1,22 @@
 (ns lijstje.logging
   (:require [clojure.tools.logging :as log]
+            [clojure.tools.logging.impl :as impl]
             [lijstje.sentry :as sentry]))
 
 (defprotocol Logger
-  (log-info! [this message])
-  (log-error! [this message throwable])
-  (log-warning! [this message throwable]))
+  (-log [this ns level message throwable]))
+
+(defmacro log [logger level message throwable]
+  `(-log ~logger ~*ns* ~level ~message ~throwable))
+
+(defmacro log-info! [logger message]
+  `(log ~logger :info ~message nil))
+
+(defmacro log-warning! [logger message throwable]
+  `(log ~logger :warn ~message ~throwable))
+
+(defmacro log-error! [logger message throwable]
+  `(log ~logger :error ~message ~throwable))
 
 (defn uncaught-exception-handler [logger]
   (reify Thread$UncaughtExceptionHandler
@@ -15,17 +26,11 @@
 
 (defn init! [sentry-client]
   (let [logger (reify Logger
-                 (log-info!
-                   [_ message]
-                   (log/info message))
-                 (log-error!
-                   [_ message throwable]
-                   (log/error throwable message)
-                   (sentry/capture-exception! sentry-client throwable))
-                 (log-warning!
-                   [_ message throwable]
-                   (log/warn throwable message)
-                   (sentry/capture-exception! sentry-client throwable)))]
+                 (-log [_ ns level message throwable]
+                   (let [logger (impl/get-logger log/*logger-factory* ns)]
+                     (log/log* logger level throwable message))
+                   (when throwable
+                     (sentry/capture-exception! sentry-client throwable))))]
     (Thread/setDefaultUncaughtExceptionHandler
      (uncaught-exception-handler logger))
     logger))
