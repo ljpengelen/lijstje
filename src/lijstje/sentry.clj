@@ -13,9 +13,9 @@
         (.setTracesSampleRate 0)
         (.setDebug true)))))
 
-(defn init! [dsn environment]
+(defn create-sentry-client [dsn environment]
   (Sentry/init (configurer dsn environment))
   (reify SentryClient
     (capture-exception!
-     [_ exception]
-     (Sentry/captureException exception))))
+      [_ exception]
+      (Sentry/captureException exception))))

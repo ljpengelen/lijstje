@@ -23,7 +23,8 @@
    ::sentry-client (:sentry env)
    ::server {:handler (ig/ref ::handler)
              :logger (ig/ref ::logger)
-             :port (:port env)}})
+             :port (:port env)}
+   ::uncaught-exception-handler {:logger (ig/ref ::logger)}})
 
 (defmethod ig/init-key ::db-fns [_ _]
   (db/def-db-fns))
@@ -35,10 +36,10 @@
   jdbc-url)
 
 (defmethod ig/init-key ::logger [_ {:keys [sentry-client]}]
-  (logging/init! sentry-client))
+  (logging/create-logger sentry-client))
 
 (defmethod ig/init-key ::sentry-client [_ {:keys [dsn environment]}]
-  (sentry/init! dsn environment))
+  (sentry/create-sentry-client dsn environment))
 
 (defmethod ig/init-key ::handler [_ state]
   (app state))
@@ -62,6 +63,10 @@
 
 (defmethod ig/halt-key! ::server [_ server]
   (server))
+
+(defmethod ig/init-key ::uncaught-exception-handler [_ {:keys [logger]}]
+  (Thread/setDefaultUncaughtExceptionHandler
+   (logging/uncaught-exception-handler logger)))
 
 (defn -main [& args]
   (if (some #{"migrate"} args)

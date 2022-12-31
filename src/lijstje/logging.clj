@@ -24,13 +24,10 @@
       (let [message (str "Uncaught exception on thread " (.getName thread))]
         (log-error! logger message exception)))))
 
-(defn init! [sentry-client]
-  (let [logger (reify Logger
-                 (-log [_ ns level message throwable]
-                   (let [logger (impl/get-logger log/*logger-factory* ns)]
-                     (log/log* logger level throwable message))
-                   (when throwable
-                     (sentry/capture-exception! sentry-client throwable))))]
-    (Thread/setDefaultUncaughtExceptionHandler
-     (uncaught-exception-handler logger))
-    logger))
+(defn create-logger [sentry-client]
+  (reify Logger
+    (-log [_ ns level message throwable]
+      (let [logger (impl/get-logger log/*logger-factory* ns)]
+        (log/log* logger level throwable message))
+      (when throwable
+        (sentry/capture-exception! sentry-client throwable)))))
