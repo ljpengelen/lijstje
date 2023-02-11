@@ -1,11 +1,11 @@
 (ns lijstje.domain 
   (:require [lijstje.db :as db]))
 
-(def secure-random (java.security.SecureRandom.))
+(def secure-random (delay (java.security.SecureRandom.)))
 
 (defn random-bytes [number-of-bytes]
   (let [bytes (byte-array number-of-bytes)]
-    (.nextBytes secure-random bytes)
+    (.nextBytes @secure-random bytes)
     bytes))
 
 (def hex-format (java.util.HexFormat/of))
