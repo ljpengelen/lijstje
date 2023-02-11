@@ -1050,7 +1050,9 @@
   "name":"java.security.MessageDigest"
 },
 {
-  "name":"java.security.SecureRandom"
+  "name":"java.security.SecureRandom",
+  "queryAllPublicMethods":true,
+  "methods":[{"name":"nextBytes","parameterTypes":["byte[]"] }]
 },
 {
   "name":"java.security.SecureRandomParameters"
@@ -1136,7 +1138,10 @@
 {
   "name":"java.util.HexFormat",
   "queryAllPublicMethods":true,
-  "methods":[{"name":"parseHex","parameterTypes":["java.lang.CharSequence"] }]
+  "methods":[
+    {"name":"formatHex","parameterTypes":["byte[]"] }, 
+    {"name":"parseHex","parameterTypes":["java.lang.CharSequence"] }
+  ]
 },
 {
   "name":"java.util.LinkedList"
