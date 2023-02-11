@@ -1,5 +1,6 @@
 {:paths ["src" "resources"]
- :deps {com.github.seancorfield/next.jdbc {:mvn/version "1.2.780"}
+ :deps {com.github.clj-easy/graal-build-time {:mvn/version "0.1.4"}
+        com.github.seancorfield/next.jdbc {:mvn/version "1.2.780"}
         com.layerware/hugsql-core {:mvn/version "0.5.1"}
         com.layerware/hugsql-adapter-next-jdbc {:mvn/version "0.5.1"
                                                 :exlusions [seancorfield/next.jdbc]}
