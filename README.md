@@ -27,3 +27,23 @@ Starting the application like this doesn't require Clojure, only Java.
 
 Use `clojure -X:migrate` to run migrations via Clojure.
 Use `java -jar target/lijstje-<version>-standalone.jar migrate` to run migrations via Java.
+
+## Creating a native image
+
+Use the GraalVM tracing agent to find out which code is reachable and capture this information in the form of configuration
+files by first executing the following command:
+
+```
+java -agentlib:native-image-agent=config-output-dir=resources/META-INF/native-image/generated -jar target/lijstje-<version>-standalone.jar
+```
+
+While the app is running, perform some requests to allow the tracing agent to do its work.
+
+Afterwards, execute the following command to create a native image:
+
+```
+native-image -jar target/lijstje-<version>-standalone.jar --no-fallback \
+--initialize-at-build-time=ch.qos.logback \
+--initialize-at-build-time=org.slf4j \
+target/lijstje
+```
