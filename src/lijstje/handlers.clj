@@ -68,7 +68,7 @@
     [:post "/"]
     (anti-forgery-field)
     [:label "Naam van je lijstje"
-     (form/text-field {:maxlength 100 :required true} :name)]
+     (form/text-field {:maxlength 100 :required true :autocomplete "off"} :name)]
     (confirmation-button "Maak nieuwe lijst"))))
 
 (defn create-list [{:keys [datasource]} request]
@@ -165,11 +165,11 @@
       [:post (str "/list/" external-list-id "/edit/gift")]
       (anti-forgery-field)
       [:label "Naam"
-       (form/text-field {:maxlength 100 :required true} :name)]
+       (form/text-field {:maxlength 100 :required true :autocomplete "off"} :name)]
       [:label "Richtprijs"
-       (form/text-field {:maxlength 100 :required true} :price)]
+       (form/text-field {:maxlength 100 :required true :autocomplete "off"} :price)]
       [:label "Omschrijving"
-       (form/text-area {:maxlength 2000 :required true :rows 10} :description)]
+       (form/text-area {:maxlength 2000 :required true :rows 10 :autocomplete "off"} :description)]
       [:div {:class "horizontal-buttons"}
        (cancellation-button (str "/list/" external-list-id "/edit") "Ga terug")
        (confirmation-button "Voeg cadeau toe")]))))
@@ -193,12 +193,12 @@
       [:post (str "/list/" external-list-id "/edit/gift/" external-gift-id "/edit")]
       (anti-forgery-field)
       [:label "Naam"
-       (form/text-field {:maxlength 100 :required true :value name} :name)]
+       (form/text-field {:maxlength 100 :required true :value name :autocomplete "off"} :name)]
       [:label "Richtprijs"
-       (form/text-field {:maxlength 100 :required true :value price} :price)]
+       (form/text-field {:maxlength 100 :required true :value price :autocomplete "off"} :price)]
       [:label "Omschrijving"
        #_{:clj-kondo/ignore [:invalid-arity]}
-       (form/text-area {:maxlength 2000 :required true :rows 10} :description description)]
+       (form/text-area {:maxlength 2000 :required true :rows 10 :autocomplete "off"} :description description)]
       [:div {:class "horizontal-buttons"}
        (cancellation-button (str "/list/" external-list-id "/edit") "Ga terug")
        (confirmation-button "Sla wijzigingen op")]))))
@@ -245,7 +245,7 @@
       [:post (str "/list/" external-list-id "/view/gift/" external-gift-id "/reserve")]
       (anti-forgery-field)
       [:label "Jouw naam"
-       (form/text-field {:maxlength 100 :required true} :reserved-by)]
+       (form/text-field {:maxlength 100 :required true :autocomplete "name"} :reserved-by)]
       [:div {:class "horizontal-buttons"}
        [:a {:class "secondary-button" :href (str "/list/" external-list-id "/view")} "Ga terug"]
        #_ {:clj-kondo/ignore [:invalid-arity]}
