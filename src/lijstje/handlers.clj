@@ -57,6 +57,13 @@
      (hp/include-css (str "/css/screen.css?version=" (compiled-at)))]
     [:body content])})
 
+(defmacro version [] (or (System/getenv "VERSION") "untracked"))
+
+(defn render-info-object [_ _]
+    {:status 200
+     :headers {"Content-type" "application/json"}
+     :body (str "{\"version\": \"" (version) "\"}")})
+
 (defn confirmation-button [text]
   #_{:clj-kondo/ignore [:invalid-arity]}
   (form/submit-button {:class "button" :name :ok} text))

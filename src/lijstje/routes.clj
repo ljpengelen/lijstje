@@ -48,7 +48,8 @@
          ["/edit" {:get h/render-edit-gift-page
                    :post h/update-gift}]
          ["/delete" {:get h/render-delete-gift-page
-                     :post h/delete-gift}]]]]]]
+                     :post h/delete-gift}]]]]]
+     ["/info" {:get h/render-info-object}]]
     {:data {:middleware [[wrap-pretty-exceptions logger]
                          wrap-params
                          wrap-keyword-params
