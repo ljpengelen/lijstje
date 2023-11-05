@@ -14,6 +14,8 @@ COPY deps.edn .
 RUN clojure -P -X:run
 RUN clojure -P -X:uberjar
 
+ARG VERSION
+ENV VERSION=$VERSION
 COPY . .
 RUN clojure -X:uberjar
 RUN cp target/lijstje-*-standalone.jar /build/lijstje-standalone.jar

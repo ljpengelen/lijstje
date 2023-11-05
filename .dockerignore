@@ -11,3 +11,4 @@ target
 .nrepl-port
 *.db
 *.md
+deploy.sh

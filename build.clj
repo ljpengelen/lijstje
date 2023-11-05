@@ -1,16 +1,19 @@
 (ns build
-  (:require [clojure.tools.build.api :as b]))
+  (:require [clojure.string :as string]
+            [clojure.tools.build.api :as b]))
 
-(def version (format "0.1.%s" (b/git-count-revs nil)))
+(def version
+  (let [predefined-version (System/getenv "VERSION")]
+    (if (string/blank? predefined-version)
+      (format "v0.1.%s" (b/git-count-revs nil))
+      predefined-version)))
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
 (def uber-file (format "target/lijstje-%s-standalone.jar" version))
 
-(defn clean [_]
-  (b/delete {:path "target"}))
-
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn uber [_]
-  (clean nil)
+  (b/delete {:path "target"})
   (b/copy-dir {:src-dirs ["src" "resources"]
                :target-dir class-dir})
   (b/compile-clj {:basis basis
