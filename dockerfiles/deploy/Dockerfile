@@ -35,7 +35,7 @@ COPY --from=build /build/dokku/CHECKS .
 COPY --from=build /build/dokku/app.json .
 
 ENV JAVA_HOME=/opt/java/openjdk
-ENV PATH "${JAVA_HOME}/bin:${PATH}"
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 COPY --from=build /build/javaruntime $JAVA_HOME
 
 COPY --from=build /build/lijstje-standalone.jar .
