@@ -31,7 +31,7 @@
 
 (defmacro compiled-at [] (System/currentTimeMillis))
 
-(defn page [& content]
+(defn page-with-title [title & content]
   {:status 200
    :headers {"Content-type" "text/html"}
    :body
@@ -52,10 +52,13 @@
              :type "image/png"
              :sizes "16x16"
              :href "/favicon-16x16.png"}]
-     [:title "Verlanglijstje"]
+     [:title (str "Verlanglijstje" (when title (str " " title)))]
      (hp/include-css "/css/reset.css")
      (hp/include-css (str "/css/screen.css?version=" (compiled-at)))]
     [:body content])})
+
+(defn page [& content]
+  (page-with-title nil content))
 
 (defmacro version [] (or (System/getenv "VERSION") "untracked"))
 
@@ -93,7 +96,8 @@
   (let [{:keys [external-list-id]} (:path-params request)
         {:keys [name gifts public-external-id]}
         (domain/get-list-by-private-id datasource external-list-id)]
-    (page
+    (page-with-title
+     name
      [:h1 "Bewerk verlanglijstje " (h name)]
      [:div {:class "edit-list"}
       [:div {:class "edit-list-urls"}
@@ -123,7 +127,8 @@
 (defn render-delete-list-page [{:keys [datasource]} request]
   (let [{:keys [external-list-id]} (:path-params request)
         {:keys [name]} (domain/get-list-by-private-id datasource external-list-id)]
-    (page
+    (page-with-title
+     name
      [:h1 "Verwijder " (h name)]
      [:p
       "Weet je zeker dat je het verlanglijstje \"" (h name) "\" wilt verwijderen? "
@@ -145,7 +150,8 @@
 (defn render-view-list-page [{:keys [datasource]} request]
   (let [{:keys [external-list-id]} (:path-params request)
         {:keys [name gifts]} (domain/get-list-by-public-id datasource external-list-id)]
-    (page
+    (page-with-title
+     name
      [:div {:class "header"}
       [:h1 "Ver&shy;lang&shy;lijst&shy;je " (h name)]
       [:a {:class "menu-button" :href "/"} "Maak nieuw lijstje"]]
