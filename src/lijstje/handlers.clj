@@ -1,8 +1,6 @@
 (ns lijstje.handlers 
   (:require [clojure.string :as string]
-            [hiccup.core :refer [h]]
-            [hiccup.form :as form]
-            [hiccup.page :as hp]
+            [hiccup2.core :as h]
             [lijstje.domain :as domain]
             [lijstje.logging :as logging]
             [ring.util.anti-forgery :refer [anti-forgery-field]]
@@ -26,8 +24,8 @@
                 end (.getEndIndex span)
                 text (subs input begin end)]]
       (if (instance? LinkSpan span)
-        (str "<a target=\"_blank\" rel=\"noreferrer\" href=\"" (with-protocol text) "\">" text "</a>")
-        (h text)))))
+        (h/raw "<a target=\"_blank\" rel=\"noreferrer\" href=\"" (with-protocol text) "\">" text "</a>") 
+        text))))
 
 (defmacro compiled-at [] (System/currentTimeMillis))
 
@@ -35,27 +33,29 @@
   {:status 200
    :headers {"Content-type" "text/html"}
    :body
-   (hp/html5
-    {:lang "nl"}
-    [:head
-     [:meta {:charset "utf-8"}]
-     [:meta {:name "viewport"
-             :content "width=device-width,initial-scale=1"}]
-     [:link {:rel "apple-touch-icon"
-             :sizes "180x180"
-             :href "/apple-touch-icon.png"}]
-     [:link {:rel "icon"
-             :type "image/png"
-             :sizes "32x32"
-             :href "/favicon-32x32.png"}]
-     [:link {:rel "icon"
-             :type "image/png"
-             :sizes "16x16"
-             :href "/favicon-16x16.png"}]
-     [:title (str "Verlanglijstje" (when title (str " " title)))]
-     (hp/include-css "/css/reset.css")
-     (hp/include-css (str "/css/screen.css?version=" (compiled-at)))]
-    [:body content])})
+   (str
+    (h/html
+     (h/raw "<!DOCTYPE html>")
+     [:html {:lang "nl"}
+      [:head
+       [:meta {:charset "utf-8"}]
+       [:meta {:name "viewport"
+               :content "width=device-width,initial-scale=1"}]
+       [:link {:rel "apple-touch-icon"
+               :sizes "180x180"
+               :href "/apple-touch-icon.png"}]
+       [:link {:rel "icon"
+               :type "image/png"
+               :sizes "32x32"
+               :href "/favicon-32x32.png"}]
+       [:link {:rel "icon"
+               :type "image/png"
+               :sizes "16x16"
+               :href "/favicon-16x16.png"}]
+       [:title "Verlanglijstje" (when title (str " " title))]
+       [:link {:type "text/css" :href "/css/reset.css" :rel "stylesheet"}]
+       [:link {:type "text/css" :href (str "/css/screen.css?version=" (compiled-at)) :rel "stylesheet"}]]
+      [:body content]]))})
 
 (defn page [& content]
   (page-with-title nil content))
@@ -68,18 +68,18 @@
      :body (str "{\"version\": \"" (version) "\"}")})
 
 (defn confirmation-button [text]
-  #_{:clj-kondo/ignore [:invalid-arity]}
-  (form/submit-button {:class "button" :name :ok} text))
+  [:input {:type "submit" :class "button" :name "ok" :value text}])
 
 (defn render-create-list-page [_ _]
   (page
    [:h1 "Maak een nieuw verlanglijstje"]
-   (form/form-to
-    [:post "/"]
-    (anti-forgery-field)
+   [:form
+    {:method "POST"
+     :action "/"}
+    (h/raw (anti-forgery-field))
     [:label "Naam van je lijstje"
-     (form/text-field {:maxlength 100 :required true :autocomplete "off"} :name)]
-    (confirmation-button "Maak nieuwe lijst"))))
+     [:input {:type "text" :maxlength 100 :required true :autocomplete "off" :name "name"}]]
+    (confirmation-button "Maak nieuwe lijst")]))
 
 (defn create-list [{:keys [datasource]} request]
   (let [name (-> request :params :name)
@@ -98,7 +98,7 @@
         (domain/get-list-by-private-id datasource external-list-id)]
     (page-with-title
      name
-     [:h1 "Bewerk verlanglijstje " (h name)]
+     [:h1 "Bewerk verlanglijstje " name]
      [:div {:class "edit-list"}
       [:div {:class "edit-list-urls"}
        [:p
@@ -113,8 +113,8 @@
        (for [{:keys [external-id name description price]} gifts]
          [:div {:class "gift"}
           [:div {:class "gift-name-and-price"}
-           [:div {:class "gift-name"} (h name)]
-           [:div {:class "gift-price"} (h price)]]
+           [:div {:class "gift-name"} name]
+           [:div {:class "gift-price"} price]]
           [:div {:class "gift-description"} (escape-html-and-autolink description)]
           [:div {:class "horizontal-buttons"}
            (primary-button-link (str "/list/" external-list-id "/edit/gift/" external-id "/edit") "Bewerk cadeau")
@@ -129,16 +129,17 @@
         {:keys [name]} (domain/get-list-by-private-id datasource external-list-id)]
     (page-with-title
      name
-     [:h1 "Verwijder " (h name)]
+     [:h1 "Verwijder " name]
      [:p
-      "Weet je zeker dat je het verlanglijstje \"" (h name) "\" wilt verwijderen? "
+      "Weet je zeker dat je het verlanglijstje \"" name "\" wilt verwijderen? "
       "Dit kan later niet ongedaan gemaakt worden."]
-     (form/form-to
-      [:post (str "/list/" external-list-id "/delete")]
-      (anti-forgery-field)
+     [:form
+      {:method "POST"
+       :action (str "/list/" external-list-id "/delete")}
+      (h/raw (anti-forgery-field))
       [:div {:class "horizontal-buttons"}
        (cancellation-button (str "/list/" external-list-id "/edit") "Nee, ga terug")
-       (confirmation-button "Ja, verwijder lijst")]))))
+       (confirmation-button "Ja, verwijder lijst")]])))
 
 (defn delete-list [{:keys [datasource]} request]
   (let [{:keys [external-list-id]} (:path-params request)
@@ -153,15 +154,15 @@
     (page-with-title
      name
      [:div {:class "header"}
-      [:h1 "Ver&shy;lang&shy;lijst&shy;je " (h name)]
+      [:h1 (h/raw "Ver&shy;lang&shy;lijst&shy;je ") name]
       [:a {:class "menu-button" :href "/"} "Maak nieuw lijstje"]]
      [:div {:class "gifts"}
       (for [{:keys [name description price external-id reserved-by]} (sort-by :reserved-at gifts)]
         [:div
          {:class (str "gift " (when reserved-by "reserved"))}
          [:div {:class "gift-name-and-price"}
-          [:div {:class "gift-name"} (h name)]
-          [:div {:class "gift-price"} (h price)]]
+          [:div {:class "gift-name"} name]
+          [:div {:class "gift-price"} price]]
          [:div {:class "gift-description"} (escape-html-and-autolink description)]
          (if reserved-by
            [:a {:class "button" :href (str "/list/" external-list-id "/view/gift/" external-id "/cancel-reservation")} "Maak reservering ongedaan"]
@@ -174,18 +175,19 @@
      [:p
       "In de omschrijving van het cadeau kun je ook URLs gebruiken. "
       "Degenen met wie je je lijstje deelt, krijgen dan klikbare links te zien."]
-     (form/form-to
-      [:post (str "/list/" external-list-id "/edit/gift")]
-      (anti-forgery-field)
+     [:form
+      {:method "POST"
+       :action (str "/list/" external-list-id "/edit/gift")}
+      (h/raw (anti-forgery-field))
       [:label "Naam"
-       (form/text-field {:maxlength 100 :required true :autocomplete "off"} :name)]
+       [:input {:type "text" :maxlength 100 :required true :autocomplete "off" :name "name"}]]
       [:label "Richtprijs"
-       (form/text-field {:maxlength 100 :required true :autocomplete "off"} :price)]
+       [:input {:type "text" :maxlength 100 :required true :autocomplete "off" :name "price"}]]
       [:label "Omschrijving"
-       (form/text-area {:maxlength 2000 :required true :rows 10 :autocomplete "off"} :description)]
+       [:textarea {:maxlength 2000 :required true :rows 10 :autocomplete "off" :name "description"}]]
       [:div {:class "horizontal-buttons"}
        (cancellation-button (str "/list/" external-list-id "/edit") "Ga terug")
-       (confirmation-button "Voeg cadeau toe")]))))
+       (confirmation-button "Voeg cadeau toe")]])))
 
 (defn create-gift [{:keys [datasource]} request]
   (let [{:keys [external-list-id]} (:path-params request)
@@ -198,23 +200,23 @@
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
         {:keys [name price description]} (domain/get-gift datasource external-gift-id)]
     (page
-     [:h1 "Bewerk " (h name)]
+     [:h1 "Bewerk " name]
      [:p
       "In de omschrijving van het cadeau kun je ook URLs gebruiken. "
       "Degenen met wie je je lijstje deelt, krijgen dan klikbare links te zien."]
-     (form/form-to
-      [:post (str "/list/" external-list-id "/edit/gift/" external-gift-id "/edit")]
-      (anti-forgery-field)
+     [:form
+      {:method "POST"
+       :action (str "/list/" external-list-id "/edit/gift/" external-gift-id "/edit")}
+      (h/raw (anti-forgery-field))
       [:label "Naam"
-       (form/text-field {:maxlength 100 :required true :value name :autocomplete "off"} :name)]
+       [:input {:type "text" :maxlength 100 :required true :value name :autocomplete "off" :name "name"}]]
       [:label "Richtprijs"
-       (form/text-field {:maxlength 100 :required true :value price :autocomplete "off"} :price)]
+       [:input {:type "text" :maxlength 100 :required true :value price :autocomplete "off" :name "price"}]]
       [:label "Omschrijving"
-       #_{:clj-kondo/ignore [:invalid-arity]}
-       (form/text-area {:maxlength 2000 :required true :rows 10 :autocomplete "off"} :description description)]
+       [:textarea {:maxlength 2000 :required true :rows 10 :autocomplete "off" :name "description"} description]]
       [:div {:class "horizontal-buttons"}
        (cancellation-button (str "/list/" external-list-id "/edit") "Ga terug")
-       (confirmation-button "Sla wijzigingen op")]))))
+       (confirmation-button "Sla wijzigingen op")]])))
 
 (defn update-gift [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
@@ -227,14 +229,15 @@
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
         {:keys [name]} (domain/get-gift datasource external-gift-id)]
     (page
-     [:h1 "Verwijder " (h name)]
-     [:p "Weet je zeker dat je het cadeau \"" (h name) "\" wilt verwijderen?"]
-     (form/form-to
-      [:post (str "/list/" external-list-id "/edit/gift/" external-gift-id "/delete")]
-      (anti-forgery-field)
+     [:h1 "Verwijder " name]
+     [:p "Weet je zeker dat je het cadeau \"" name "\" wilt verwijderen?"]
+     [:form
+      {:method "POST"
+       :action (str "/list/" external-list-id "/edit/gift/" external-gift-id "/delete")}
+      (h/raw (anti-forgery-field))
       [:div {:class "horizontal-buttons"}
        (cancellation-button (str "/list/" external-list-id "/edit") "Nee, ga terug")
-       (confirmation-button "Ja, verwijder cadeau")]))))
+       (confirmation-button "Ja, verwijder cadeau")]])))
 
 (defn delete-gift [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
@@ -247,22 +250,22 @@
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
         {:keys [name]} (domain/get-gift datasource external-gift-id)]
     (page
-     [:h1 "Reserveer " (h name)]
+     [:h1 "Reserveer " name]
      [:p
       "Je kunt cadeau's reserveren als je van plan bent om ze te kopen. "
       "Als dat uiteindelijk niet lukt, dan kun je de reservering weer ongedaan maken. "]
      [:p
       "Geef een naam op bij het reserveren, dan weet je later zeker dat jij degene bent "
       "die een cadeau gereserveerd had."]
-     (form/form-to
-      [:post (str "/list/" external-list-id "/view/gift/" external-gift-id "/reserve")]
-      (anti-forgery-field)
+     [:form
+      {:method "POST"
+       :action (str "/list/" external-list-id "/view/gift/" external-gift-id "/reserve")}
+      (h/raw (anti-forgery-field))
       [:label "Jouw naam"
-       (form/text-field {:maxlength 100 :required true :autocomplete "name"} :reserved-by)]
+       [:input {:type "text" :maxlength 100 :required true :autocomplete "name" :name "reserved-by"}]]
       [:div {:class "horizontal-buttons"}
        [:a {:class "secondary-button" :href (str "/list/" external-list-id "/view")} "Ga terug"]
-       #_ {:clj-kondo/ignore [:invalid-arity]}
-       (form/submit-button {:class "button" :name :ok} "Reserveer cadeau")]))))
+       [:input {:type "submit" :class "button" :name :ok} "Reserveer cadeau"]]])))
 
 (defn reserve-gift [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
@@ -275,17 +278,17 @@
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)
         {:keys [name reserved-by]} (domain/get-gift datasource external-gift-id)]
     (page
-     [:h1 "Annuleer reservering van " (h name)]
+     [:h1 "Annuleer reservering van " name]
      [:p
-      "Dit cadeau is gereserveerd door " (h reserved-by) ". "
+      "Dit cadeau is gereserveerd door " reserved-by ". "
       "Weet je zeker dat je deze reservering ongedaan wilt maken?"]
-     (form/form-to
-      [:post (str "/list/" external-list-id "/view/gift/" external-gift-id "/cancel-reservation")]
-      (anti-forgery-field)
+     [:form
+      {:method "POST"
+       :action (str "/list/" external-list-id "/view/gift/" external-gift-id "/cancel-reservation")}
+      (h/raw (anti-forgery-field))
       [:div {:class "horizontal-buttons"}
        [:a {:class "secondary-button" :href (str "/list/" external-list-id "/view")} "Nee, ga terug"]
-       #_ {:clj-kondo/ignore [:invalid-arity]}
-       (form/submit-button {:class "button" :name :ok} "Ja, maak reservering ongedaan")]))))
+       [:input {:type "submit" :class "button" :name :ok} "Ja, maak reservering ongedaan"]]])))
 
 (defn cancel-gift-reservation [{:keys [datasource]} request]
   (let [{:keys [external-list-id external-gift-id]} (:path-params request)

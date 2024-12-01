@@ -4,7 +4,7 @@
         com.layerware/hugsql-core {:mvn/version "0.5.1"}
         com.layerware/hugsql-adapter-next-jdbc {:mvn/version "0.5.1"
                                                 :exlusions [seancorfield/next.jdbc]}
-        hiccup/hiccup {:mvn/version "1.0.5"}
+        hiccup/hiccup {:mvn/version "2.0.0-RC4"}
         http-kit/http-kit {:mvn/version "2.5.3"}
         integrant/integrant {:mvn/version "0.8.0"}
         io.sentry/sentry {:mvn/version "6.10.0"}
